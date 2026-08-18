@@ -27,7 +27,7 @@ export function FiltrosPersonas({
   }
 
   return (
-    <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
+    <>
       <select
         className="campo"
         defaultValue={searchParams.get("vacante") ?? ""}
@@ -95,6 +95,6 @@ export function FiltrosPersonas({
         />
         Mostrar ocultos
       </label>
-    </div>
+    </>
   );
 }

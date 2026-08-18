@@ -11,10 +11,13 @@ export default async function CandidatosKanbanPage({
     vacante?: string;
     reclutador?: string;
     origen?: string;
+    provincia?: string;
+    ingles?: string;
+    stack?: string;
     ocultos?: string;
   }>;
 }) {
-  const { vacante, reclutador, origen, ocultos } = await searchParams;
+  const { vacante, reclutador, origen, provincia, ingles, stack, ocultos } = await searchParams;
   const supabase = await createClient();
 
   let consulta = supabase.from("vw_postulaciones_pipeline").select("*");
@@ -22,14 +25,24 @@ export default async function CandidatosKanbanPage({
   if (vacante) consulta = consulta.eq("vacante_id", vacante);
   if (reclutador) consulta = consulta.eq("reclutador_asignado_id", reclutador);
   if (origen) consulta = consulta.eq("candidato_origen", origen);
+  if (provincia) consulta = consulta.eq("candidato_provincia_estado", provincia);
+  if (ingles) consulta = consulta.eq("candidato_nivel_ingles", ingles);
+  if (stack) consulta = consulta.ilike("candidato_stack_principal", `%${stack}%`);
 
-  const [{ data: postulaciones }, { data: vacantes }, { data: equipo }] = await Promise.all([
-    consulta.returns<PostulacionConDias[]>(),
-    supabase.from("vacantes").select("*").returns<Vacante[]>(),
-    supabase.from("equipo").select("*").eq("activo", true).returns<Equipo[]>(),
-  ]);
+  const [{ data: postulaciones }, { data: vacantes }, { data: equipo }, { data: perfiles }] =
+    await Promise.all([
+      consulta.returns<PostulacionConDias[]>(),
+      supabase.from("vacantes").select("*").returns<Vacante[]>(),
+      supabase.from("equipo").select("*").eq("activo", true).returns<Equipo[]>(),
+      supabase
+        .from("candidatos")
+        .select("provincia_estado, nivel_ingles")
+        .returns<{ provincia_estado: string | null; nivel_ingles: string | null }[]>(),
+    ]);
 
   const nombrePorId = new Map((equipo ?? []).map((p) => [p.id, p.nombre ?? p.email]));
+  const provincias = [...new Set((perfiles ?? []).map((p) => p.provincia_estado).filter((v): v is string => !!v))].sort();
+  const nivelesIngles = [...new Set((perfiles ?? []).map((p) => p.nivel_ingles).filter((v): v is string => !!v))].sort();
 
   return (
     <div>
@@ -42,12 +55,16 @@ export default async function CandidatosKanbanPage({
         </Link>
       </div>
       <div className="px-8">
-        <FiltrosCandidatos
-          basePath="/candidatos/kanban"
-          vacantes={vacantes ?? []}
-          equipo={equipo ?? []}
-          incluirOcultos
-        />
+        <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
+          <FiltrosCandidatos
+            basePath="/candidatos/kanban"
+            vacantes={vacantes ?? []}
+            equipo={equipo ?? []}
+            provincias={provincias}
+            nivelesIngles={nivelesIngles}
+            incluirOcultos
+          />
+        </div>
       </div>
       <TableroCandidatos postulacionesIniciales={postulaciones ?? []} nombrePorId={nombrePorId} />
     </div>

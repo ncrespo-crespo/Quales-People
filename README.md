@@ -85,7 +85,11 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
   presentó), provincia/estado y nivel de inglés (desplegables armados a
   partir de los valores que ya existen cargados, no una lista fija), y
   stack principal (búsqueda de texto libre — pensado para términos como
-  "SQL", "Snowflake", "PBI"; en el futuro se puede convertir en tags).
+  "SQL", "Snowflake", "PBI"; en el futuro se puede convertir en tags). El
+  tablero de postulaciones (`/candidatos/kanban`, migración 0010) tiene
+  los mismos filtros de provincia/estado, nivel de inglés y stack. En
+  ambas pantallas todos los filtros (incluido el de año) quedan en una
+  sola fila.
 
 El resto de las funcionalidades (Gmail) se
 construyen en las fases siguientes (ver el PRD, sección 6 — Roadmap de
@@ -130,6 +134,11 @@ Después correr también, en orden:
   cargado. Importante correrla recién **después** de la carga inicial de
   la planilla (más abajo), nunca antes — necesita que `candidatos` ya
   tenga los datos para poder migrarlos.
+- `0010_filtros_tablero_postulaciones.sql` — agrega a la vista del
+  tablero (`vw_postulaciones_pipeline`) provincia/estado, nivel de
+  inglés y stack principal del candidato, para poder filtrar el
+  tablero de postulaciones igual que ya se filtra el listado de
+  candidatos.
 
 ### Carga inicial desde la planilla de reclutamiento
 

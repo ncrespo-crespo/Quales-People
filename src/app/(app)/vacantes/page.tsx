@@ -90,7 +90,7 @@ export default async function VacantesPage({
         </div>
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
         <FiltroAnio basePath="/vacantes" />
         <FiltrosVacantes estados={estados ?? []} equipo={equipo ?? []} />
       </div>

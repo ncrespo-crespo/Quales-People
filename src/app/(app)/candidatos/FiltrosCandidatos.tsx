@@ -8,11 +8,15 @@ export function FiltrosCandidatos({
   basePath,
   vacantes,
   equipo,
+  provincias = [],
+  nivelesIngles = [],
   incluirOcultos = false,
 }: {
   basePath: string;
   vacantes: Vacante[];
   equipo: Equipo[];
+  provincias?: string[];
+  nivelesIngles?: string[];
   incluirOcultos?: boolean;
 }) {
   const router = useRouter();
@@ -29,7 +33,7 @@ export function FiltrosCandidatos({
   }
 
   return (
-    <div className="flex flex-wrap gap-3 pb-4 text-sm">
+    <>
       <select
         className="campo"
         defaultValue={searchParams.get("vacante") ?? ""}
@@ -58,6 +62,39 @@ export function FiltrosCandidatos({
 
       <select
         className="campo"
+        defaultValue={searchParams.get("provincia") ?? ""}
+        onChange={(e) => actualizar("provincia", e.target.value)}
+      >
+        <option value="">Toda provincia / estado</option>
+        {provincias.map((p) => (
+          <option key={p} value={p}>
+            {p}
+          </option>
+        ))}
+      </select>
+
+      <select
+        className="campo"
+        defaultValue={searchParams.get("ingles") ?? ""}
+        onChange={(e) => actualizar("ingles", e.target.value)}
+      >
+        <option value="">Todo nivel de inglés</option>
+        {nivelesIngles.map((n) => (
+          <option key={n} value={n}>
+            {n}
+          </option>
+        ))}
+      </select>
+
+      <input
+        className="campo"
+        placeholder="Buscar por stack (SQL, Snowflake, PBI...)"
+        defaultValue={searchParams.get("stack") ?? ""}
+        onChange={(e) => actualizar("stack", e.target.value)}
+      />
+
+      <select
+        className="campo"
         defaultValue={searchParams.get("origen") ?? ""}
         onChange={(e) => actualizar("origen", e.target.value)}
       >
@@ -79,6 +116,6 @@ export function FiltrosCandidatos({
           Mostrar ocultos
         </label>
       )}
-    </div>
+    </>
   );
 }

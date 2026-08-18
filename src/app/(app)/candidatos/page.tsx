@@ -110,7 +110,7 @@ export default async function CandidatosPage({
         </div>
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
         <FiltroAnio basePath="/candidatos" />
         <FiltrosPersonas vacantes={vacantes ?? []} provincias={provincias} nivelesIngles={nivelesIngles} />
       </div>

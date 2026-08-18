@@ -25,7 +25,7 @@ export function FiltrosVacantes({
   }
 
   return (
-    <div className="mb-4 flex flex-wrap gap-3 text-sm">
+    <>
       <select
         className="campo"
         defaultValue={searchParams.get("estado") ?? ""}
@@ -71,6 +71,6 @@ export function FiltrosVacantes({
         defaultValue={searchParams.get("cliente") ?? ""}
         onChange={(e) => actualizar("cliente", e.target.value)}
       />
-    </div>
+    </>
   );
 }

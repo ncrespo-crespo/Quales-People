@@ -166,6 +166,9 @@ export type PostulacionConDias = Postulacion & {
   candidato_linkedin_url: string | null;
   fecha_desde_etapa_actual: string | null;
   dias_en_etapa: number | null;
+  candidato_provincia_estado: string | null;
+  candidato_nivel_ingles: string | null;
+  candidato_stack_principal: string | null;
 };
 
 export type HistorialEtapa = {
