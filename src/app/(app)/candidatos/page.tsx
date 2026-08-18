@@ -67,7 +67,13 @@ export default async function CandidatosPage({
   const [{ data: candidatos }, { data: postulaciones }, { data: vacantes }, { data: perfiles }] =
     await Promise.all([
       consulta.returns<Candidato[]>(),
-      supabase.from("postulaciones").select("id, candidato_id").returns<Pick<Postulacion, "id" | "candidato_id">[]>(),
+      supabase
+        .from("postulaciones")
+        .select("id, candidato_id, etapa_actual, estado_final, fecha_postulacion")
+        .order("fecha_postulacion", { ascending: false })
+        .returns<
+          Pick<Postulacion, "id" | "candidato_id" | "etapa_actual" | "estado_final" | "fecha_postulacion">[]
+        >(),
       supabase.from("vacantes").select("*").returns<Vacante[]>(),
       supabase
         .from("candidatos")
@@ -76,8 +82,14 @@ export default async function CandidatosPage({
     ]);
 
   const postulacionesPorCandidato = new Map<string, number>();
+  // Ordenadas por fecha_postulacion desc: la primera que aparece por
+  // candidato es su postulación más reciente.
+  const estadoPorCandidato = new Map<string, string>();
   for (const p of postulaciones ?? []) {
     postulacionesPorCandidato.set(p.candidato_id, (postulacionesPorCandidato.get(p.candidato_id) ?? 0) + 1);
+    if (!estadoPorCandidato.has(p.candidato_id)) {
+      estadoPorCandidato.set(p.candidato_id, p.estado_final ?? p.etapa_actual);
+    }
   }
 
   const provincias = [...new Set((perfiles ?? []).map((p) => p.provincia_estado).filter((v): v is string => !!v))].sort();
@@ -123,6 +135,7 @@ export default async function CandidatosPage({
               <th className="px-4 py-2">Contacto</th>
               {encabezado("origen", "Origen")}
               {encabezado("fecha_ingreso", "Fecha de contacto", "desc")}
+              <th className="px-4 py-2">Estado</th>
               <th className="px-4 py-2">Postulaciones</th>
               <th className="px-4 py-2">LinkedIn</th>
               <th className="px-4 py-2" />
@@ -149,6 +162,9 @@ export default async function CandidatosPage({
                 </td>
                 <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
                   {formatearFecha(candidato.fecha_ingreso)}
+                </td>
+                <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
+                  {estadoPorCandidato.get(candidato.id) ?? "—"}
                 </td>
                 <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
                   {postulacionesPorCandidato.get(candidato.id) ?? 0}
@@ -190,7 +206,7 @@ export default async function CandidatosPage({
             ))}
             {(candidatos ?? []).length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-zinc-500">
+                <td colSpan={8} className="px-4 py-8 text-center text-zinc-500">
                   Todavía no hay candidatos cargados.
                 </td>
               </tr>

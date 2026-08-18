@@ -31,11 +31,6 @@ function revalidarTodo(candidatoId: string) {
 
 export async function crearPostulacion(candidatoId: string, formData: FormData) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const etapaInicial = "Sourcing";
 
   const { data: postulacion, error } = await supabase
     .from("postulaciones")
@@ -43,7 +38,7 @@ export async function crearPostulacion(candidatoId: string, formData: FormData) 
       candidato_id: candidatoId,
       vacante_id: valorONulo(formData, "vacante_id"),
       reclutador_asignado_id: valorONulo(formData, "reclutador_asignado_id"),
-      etapa_actual: etapaInicial,
+      etapa_actual: "Sourcing",
     })
     .select("id")
     .single();
@@ -54,13 +49,9 @@ export async function crearPostulacion(candidatoId: string, formData: FormData) 
     );
   }
 
-  await supabase.from("historial_etapas").insert({
-    postulacion_id: postulacion.id,
-    etapa_anterior: null,
-    etapa_nueva: etapaInicial,
-    movido_por_id: user!.id,
-  });
-
+  // Sin historial acá: recién queda registro de movimiento cuando cambia de
+  // etapa de verdad (ver actualizarPostulacion/moverPostulacion). El alta
+  // en sí ya se ve en "fecha de postulación".
   revalidarTodo(candidatoId);
   redirect(`/candidatos/${candidatoId}`);
 }

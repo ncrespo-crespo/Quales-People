@@ -68,9 +68,6 @@ async function subirCvSiCorresponde(
 // después "agregar postulación" para el caso más común).
 export async function crearCandidato(formData: FormData) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   const vacanteInicial = valorONulo(formData, "vacante_id");
 
@@ -137,13 +134,6 @@ export async function crearCandidato(formData: FormData) {
         )}`,
       );
     }
-
-    await supabase.from("historial_etapas").insert({
-      postulacion_id: postulacion.id,
-      etapa_anterior: null,
-      etapa_nueva: "Sourcing",
-      movido_por_id: user!.id,
-    });
   }
 
   revalidatePath("/candidatos");
