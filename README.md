@@ -81,6 +81,11 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
   `src/lib/types.ts`) y selector para cambiarlo. Una vacante o candidato
   sin esa fecha cargada no va a aparecer bajo ningún año — no hay forma
   de ubicarlo en el tiempo sin ese dato.
+- `/candidatos` suma filtros por postulación (vacante a la que se
+  presentó), provincia/estado y nivel de inglés (desplegables armados a
+  partir de los valores que ya existen cargados, no una lista fija), y
+  stack principal (búsqueda de texto libre — pensado para términos como
+  "SQL", "Snowflake", "PBI"; en el futuro se puede convertir en tags).
 
 El resto de las funcionalidades (Gmail) se
 construyen en las fases siguientes (ver el PRD, sección 6 — Roadmap de

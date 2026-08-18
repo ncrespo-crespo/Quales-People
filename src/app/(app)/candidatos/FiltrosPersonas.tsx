@@ -1,9 +1,18 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import type { Vacante } from "@/lib/types";
 import { ORIGENES_CANDIDATO } from "@/lib/types";
 
-export function FiltrosPersonas() {
+export function FiltrosPersonas({
+  vacantes,
+  provincias,
+  nivelesIngles,
+}: {
+  vacantes: Vacante[];
+  provincias: string[];
+  nivelesIngles: string[];
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -19,6 +28,52 @@ export function FiltrosPersonas() {
 
   return (
     <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
+      <select
+        className="campo"
+        defaultValue={searchParams.get("vacante") ?? ""}
+        onChange={(e) => actualizar("vacante", e.target.value)}
+      >
+        <option value="">Todas las postulaciones</option>
+        {vacantes.map((v) => (
+          <option key={v.id} value={v.id}>
+            {v.titulo}
+          </option>
+        ))}
+      </select>
+
+      <select
+        className="campo"
+        defaultValue={searchParams.get("provincia") ?? ""}
+        onChange={(e) => actualizar("provincia", e.target.value)}
+      >
+        <option value="">Toda provincia / estado</option>
+        {provincias.map((p) => (
+          <option key={p} value={p}>
+            {p}
+          </option>
+        ))}
+      </select>
+
+      <select
+        className="campo"
+        defaultValue={searchParams.get("ingles") ?? ""}
+        onChange={(e) => actualizar("ingles", e.target.value)}
+      >
+        <option value="">Todo nivel de inglés</option>
+        {nivelesIngles.map((n) => (
+          <option key={n} value={n}>
+            {n}
+          </option>
+        ))}
+      </select>
+
+      <input
+        className="campo"
+        placeholder="Buscar por stack (SQL, Snowflake, PBI...)"
+        defaultValue={searchParams.get("stack") ?? ""}
+        onChange={(e) => actualizar("stack", e.target.value)}
+      />
+
       <select
         className="campo"
         defaultValue={searchParams.get("origen") ?? ""}
