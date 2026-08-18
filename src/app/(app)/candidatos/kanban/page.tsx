@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { CandidatoConDias, Equipo, Vacante } from "@/lib/types";
-import { FiltrosCandidatos } from "./FiltrosCandidatos";
+import { FiltrosCandidatos } from "../FiltrosCandidatos";
 import { TableroCandidatos } from "./TableroCandidatos";
 
 export default async function CandidatosKanbanPage({
@@ -35,7 +35,9 @@ export default async function CandidatosKanbanPage({
           Ver como tabla
         </Link>
       </div>
-      <FiltrosCandidatos vacantes={vacantes ?? []} equipo={equipo ?? []} />
+      <div className="px-8">
+        <FiltrosCandidatos basePath="/candidatos/kanban" vacantes={vacantes ?? []} equipo={equipo ?? []} />
+      </div>
       <TableroCandidatos candidatosIniciales={candidatos ?? []} nombrePorId={nombrePorId} />
     </div>
   );

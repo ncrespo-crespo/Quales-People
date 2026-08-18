@@ -1,4 +1,5 @@
 import type { Equipo, EstadoVacante, Vacante } from "@/lib/types";
+import { PRIORIDADES_VACANTE } from "@/lib/types";
 
 export function FormularioVacante({
   action,
@@ -55,6 +56,21 @@ export function FormularioVacante({
           {estados.map((estado) => (
             <option key={estado.id} value={estado.id}>
               {estado.nombre}
+            </option>
+          ))}
+        </select>
+      </Campo>
+
+      <Campo label="Prioridad">
+        <select
+          name="prioridad"
+          required
+          defaultValue={vacante?.prioridad ?? "Media"}
+          className="campo"
+        >
+          {PRIORIDADES_VACANTE.map((p) => (
+            <option key={p} value={p}>
+              {p}
             </option>
           ))}
         </select>

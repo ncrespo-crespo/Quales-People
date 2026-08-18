@@ -14,7 +14,7 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
 - **Vercel** — hosting del frontend.
 - **Tailwind CSS** — estilos.
 
-## Estado actual: Fase 3 — Tableros Kanban
+## Estado actual: Fase 4 — Ficha de candidato
 
 - Fase 0: scaffold de Next.js, cliente de Supabase, deploy en Vercel.
 - Fase 1: tablas de la base de datos (sección 4 del PRD), login con
@@ -29,8 +29,21 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
   automáticamente el registro correspondiente — `historial_etapas` para
   candidatos (pide motivo si el destino es "Descartado"), o
   `fecha_cierre_proceso` para vacantes que llegan a un estado terminal.
+- Fase 4: ficha de candidato (`/candidatos/:id`) con línea de tiempo de
+  `historial_etapas`, notas de entrevistas, comunicaciones, indicador de
+  días en la etapa actual, y los datos importados de la planilla agrupados
+  en secciones plegables (los más relevantes para reclutar —
+  experiencia, inglés, stack— se ven directo, sin desplegar nada). El
+  listado de `/vacantes` tiene filtros (estado, reclutador, prioridad,
+  cliente/área), columna de fecha de inicio (orden descendente por
+  defecto), prioridad (`Alta`/`Media`/`Baja`, configurable por vacante) y
+  una insignia "Crítico" cuando una búsqueda lleva más de
+  `DIAS_OPEN_CRITICO` (3) días abierta. El listado de `/candidatos` tiene
+  los mismos filtros que el tablero (etapa, vacante, reclutador, origen),
+  más columnas de días en etapa, fecha de contacto y link directo a
+  LinkedIn.
 
-El resto de las funcionalidades (ficha de candidato, dashboard, Gmail) se
+El resto de las funcionalidades (dashboard de métricas, Gmail) se
 construyen en las fases siguientes (ver el PRD, sección 6 — Roadmap de
 construcción).
 

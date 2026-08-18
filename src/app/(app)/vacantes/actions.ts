@@ -21,6 +21,7 @@ export async function crearVacante(formData: FormData) {
     fecha_prevista_ingreso_hm: valorONulo(formData, "fecha_prevista_ingreso_hm"),
     notas: valorONulo(formData, "notas"),
     drive_url: valorONulo(formData, "drive_url"),
+    prioridad: String(formData.get("prioridad")),
   });
 
   if (error) {
@@ -46,6 +47,7 @@ export async function actualizarVacante(id: string, formData: FormData) {
       fecha_ingreso_confirmada: valorONulo(formData, "fecha_ingreso_confirmada"),
       notas: valorONulo(formData, "notas"),
       drive_url: valorONulo(formData, "drive_url"),
+      prioridad: String(formData.get("prioridad")),
     })
     .eq("id", id);
 

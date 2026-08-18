@@ -2,14 +2,18 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Equipo, Vacante } from "@/lib/types";
-import { ORIGENES_CANDIDATO } from "@/lib/types";
+import { ETAPAS_CANDIDATO, ORIGENES_CANDIDATO } from "@/lib/types";
 
 export function FiltrosCandidatos({
+  basePath,
   vacantes,
   equipo,
+  incluirEtapa = false,
 }: {
+  basePath: string;
   vacantes: Vacante[];
   equipo: Equipo[];
+  incluirEtapa?: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -21,11 +25,26 @@ export function FiltrosCandidatos({
     } else {
       params.delete(campo);
     }
-    router.push(`/candidatos/kanban?${params.toString()}`);
+    router.push(`${basePath}?${params.toString()}`);
   }
 
   return (
-    <div className="flex flex-wrap gap-3 px-8 pb-4 text-sm">
+    <div className="flex flex-wrap gap-3 pb-4 text-sm">
+      {incluirEtapa && (
+        <select
+          className="campo"
+          defaultValue={searchParams.get("etapa") ?? ""}
+          onChange={(e) => actualizar("etapa", e.target.value)}
+        >
+          <option value="">Todas las etapas</option>
+          {ETAPAS_CANDIDATO.map((e) => (
+            <option key={e} value={e}>
+              {e}
+            </option>
+          ))}
+        </select>
+      )}
+
       <select
         className="campo"
         defaultValue={searchParams.get("vacante") ?? ""}

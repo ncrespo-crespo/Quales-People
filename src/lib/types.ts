@@ -17,6 +17,13 @@ export type EstadoVacante = {
   es_terminal: boolean;
 };
 
+export const PRIORIDADES_VACANTE = ["Alta", "Media", "Baja"] as const;
+export type PrioridadVacante = (typeof PRIORIDADES_VACANTE)[number];
+
+// Umbral de días abiertos a partir del cual una búsqueda se marca "Crítica"
+// en el listado y el tablero.
+export const DIAS_OPEN_CRITICO = 3;
+
 export type Vacante = {
   id: string;
   titulo: string;
@@ -29,6 +36,7 @@ export type Vacante = {
   fecha_ingreso_confirmada: string | null;
   notas: string | null;
   drive_url: string | null;
+  prioridad: PrioridadVacante;
 };
 
 export type VacanteConMetricas = Vacante & {
@@ -78,4 +86,100 @@ export type Candidato = {
 export type CandidatoConDias = Candidato & {
   fecha_desde_etapa_actual: string | null;
   dias_en_etapa: number | null;
+};
+
+// Campos agregados en la migración 0004 a partir de la planilla
+// "Candidatosas" (ver PRD). Todos opcionales: solo están completos en los
+// candidatos importados, no en los que se cargan desde el formulario.
+export type CandidatoImportado = {
+  apellido: string | null;
+  pais: string | null;
+  provincia_estado: string | null;
+  localidad: string | null;
+  genero: string | null;
+  fecha_nacimiento: string | null;
+  area: string | null;
+  formacion_tecnica: string | null;
+  anios_experiencia: number | null;
+  experiencia_consultoria: boolean | null;
+  nivel_ingles: string | null;
+  stack_principal: string | null;
+  lugar_empleo_actual: string | null;
+  expectativa_salarial: string | null;
+  rate_fl: string | null;
+  tipo_moneda: string | null;
+  tipo_candidato: string | null;
+  disponibilidad_ingreso: string | null;
+  fuente_importada: string | null;
+  fecha_primer_contacto: string | null;
+  fecha_screening_hr: string | null;
+  seniority_propuesto_hr: string | null;
+  feedback_entrevista_hr: string | null;
+  fecha_entrevista_area: string | null;
+  seniority_propuesto_area: string | null;
+  feedback_entrevista: string | null;
+  feedback_entrevista_area: string | null;
+  avanza_ol: boolean | null;
+  fecha_envio_ol: string | null;
+  aceptacion_ol: boolean | null;
+  fecha_aceptacion_rechazo_ol: string | null;
+  motivo_rechazo_ol: string | null;
+  fecha_ingreso_efectiva: string | null;
+  feedback_proceso_candidato: string | null;
+  licencias_programadas: string | null;
+  estado_final_importado: string | null;
+  ob_cliente: string | null;
+  ob_proyecto: string | null;
+  ob_induccion_empresa: string | null;
+  ob_induccion_empresa_horario: string | null;
+  ob_induccion_area_responsable: string | null;
+  ob_induccion_area_horario: string | null;
+  ob_induccion_proyecto_responsable: string | null;
+  ob_induccion_proyecto_horario: string | null;
+  ob_fecha_envio_elementos: string | null;
+  ob_fecha_recepcion_elementos: string | null;
+};
+
+export type CandidatoCompleto = Candidato & CandidatoImportado;
+
+export type CandidatoFicha = CandidatoCompleto & {
+  fecha_desde_etapa_actual: string | null;
+  dias_en_etapa: number | null;
+};
+
+export type HistorialEtapa = {
+  id: string;
+  candidato_id: string;
+  etapa_anterior: string | null;
+  etapa_nueva: string;
+  movido_por_id: string | null;
+  nota: string | null;
+  fecha: string;
+};
+
+export type NotaEntrevista = {
+  id: string;
+  candidato_id: string;
+  entrevistador_id: string | null;
+  etapa: string | null;
+  feedback: string | null;
+  calificacion: number | null;
+  fecha: string;
+};
+
+export const TIPOS_COMUNICACION = [
+  "email_enviado",
+  "email_recibido",
+  "llamada",
+  "whatsapp",
+] as const;
+
+export type Comunicacion = {
+  id: string;
+  candidato_id: string;
+  tipo: (typeof TIPOS_COMUNICACION)[number];
+  asunto: string | null;
+  resumen: string | null;
+  gmail_thread_id: string | null;
+  fecha: string;
 };

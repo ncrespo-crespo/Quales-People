@@ -12,6 +12,7 @@ import {
 } from "@dnd-kit/core";
 import type { EstadoVacante, VacanteConMetricas } from "@/lib/types";
 import { moverVacante } from "../actions";
+import { esCritico, InsigniaCritico, InsigniaPrioridad } from "../insignias";
 
 export function TableroVacantes({
   estados,
@@ -135,7 +136,10 @@ function Tarjeta({
         isDragging ? "opacity-50" : ""
       }`}
     >
-      <p className="font-medium text-black dark:text-zinc-50">{vacante.titulo}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="font-medium text-black dark:text-zinc-50">{vacante.titulo}</p>
+        <InsigniaPrioridad prioridad={vacante.prioridad} />
+      </div>
       {vacante.cliente_o_area && (
         <p className="text-xs text-zinc-500 dark:text-zinc-400">{vacante.cliente_o_area}</p>
       )}
@@ -145,15 +149,18 @@ function Tarjeta({
             ? (nombrePorId.get(vacante.reclutador_responsable_id) ?? "—")
             : "Sin asignar"}
         </span>
-        {vacante.time_to_fill !== null ? (
-          <span className="rounded bg-black/5 px-1.5 py-0.5 dark:bg-white/10">
-            TTF {vacante.time_to_fill}d
-          </span>
-        ) : vacante.dias_open !== null ? (
-          <span className="rounded bg-black/5 px-1.5 py-0.5 dark:bg-white/10">
-            {vacante.dias_open}d open
-          </span>
-        ) : null}
+        <div className="flex items-center gap-1.5">
+          {esCritico(vacante.dias_open) && <InsigniaCritico />}
+          {vacante.time_to_fill !== null ? (
+            <span className="rounded bg-black/5 px-1.5 py-0.5 dark:bg-white/10">
+              TTF {vacante.time_to_fill}d
+            </span>
+          ) : vacante.dias_open !== null ? (
+            <span className="rounded bg-black/5 px-1.5 py-0.5 dark:bg-white/10">
+              {vacante.dias_open}d open
+            </span>
+          ) : null}
+        </div>
       </div>
     </div>
   );
