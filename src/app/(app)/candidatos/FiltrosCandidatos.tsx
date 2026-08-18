@@ -9,11 +9,13 @@ export function FiltrosCandidatos({
   vacantes,
   equipo,
   incluirEtapa = false,
+  incluirOcultos = false,
 }: {
   basePath: string;
   vacantes: Vacante[];
   equipo: Equipo[];
   incluirEtapa?: boolean;
+  incluirOcultos?: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -83,6 +85,17 @@ export function FiltrosCandidatos({
           </option>
         ))}
       </select>
+
+      {incluirOcultos && (
+        <label className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400">
+          <input
+            type="checkbox"
+            defaultChecked={searchParams.get("ocultos") === "1"}
+            onChange={(e) => actualizar("ocultos", e.target.checked ? "1" : "")}
+          />
+          Mostrar ocultos
+        </label>
+      )}
     </div>
   );
 }

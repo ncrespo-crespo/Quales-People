@@ -3,6 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  color-scheme: light;
 
   /* Paleta de marca Qualesgroup */
   --brand-navy: #0b2a5e;
@@ -16,7 +17,7 @@
   --color-brand-navy: var(--brand-navy);
   --color-brand-blue: var(--brand-blue);
   --color-brand-green: var(--brand-green);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-poppins);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -24,17 +25,27 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    color-scheme: dark;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins), Arial, Helvetica, sans-serif;
 }
 
 @layer components {
+  /* bg-white/dark:bg-zinc-900 explícito (no transparente): en varios
+     navegadores el popup de opciones de un <select> toma el fondo real
+     del elemento, y con fondo transparente termina mezclando el tema del
+     sistema operativo con nuestro color de texto forzado (texto blanco
+     sobre fondo blanco, o viceversa). */
   .campo {
-    @apply rounded border border-black/15 bg-transparent px-3 py-2 text-black outline-none focus:border-brand-blue dark:border-white/15 dark:text-zinc-50;
+    @apply rounded border border-black/15 bg-white px-3 py-2 text-black outline-none focus:border-brand-blue dark:border-white/15 dark:bg-zinc-900 dark:text-zinc-50;
+  }
+
+  .campo option {
+    @apply bg-white text-black dark:bg-zinc-900 dark:text-zinc-50;
   }
 }

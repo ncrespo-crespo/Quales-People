@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { Candidato, Equipo, Vacante } from "@/lib/types";
+import type { CandidatoCompleto, Equipo, Vacante } from "@/lib/types";
 import { FormularioCandidato } from "../../FormularioCandidato";
 import { actualizarCandidato } from "../../actions";
 
@@ -16,7 +16,7 @@ export default async function EditarCandidatoPage({
   const supabase = await createClient();
 
   const [{ data: candidato }, { data: vacantes }, { data: equipo }] = await Promise.all([
-    supabase.from("candidatos").select("*").eq("id", id).single<Candidato>(),
+    supabase.from("candidatos").select("*").eq("id", id).single<CandidatoCompleto>(),
     supabase.from("vacantes").select("*").returns<Vacante[]>(),
     supabase.from("equipo").select("*").eq("activo", true).returns<Equipo[]>(),
   ]);

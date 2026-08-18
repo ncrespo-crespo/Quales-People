@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Equipo, EstadoVacante, VacanteConMetricas } from "@/lib/types";
+import { EncabezadoOrdenable } from "@/components/EncabezadoOrdenable";
 import { FiltrosVacantes } from "./FiltrosVacantes";
 import { esCritico, InsigniaCritico, InsigniaPrioridad } from "./insignias";
 
@@ -8,6 +9,15 @@ function formatearFecha(fecha: string | null) {
   if (!fecha) return "—";
   return new Date(fecha).toLocaleDateString("es-AR");
 }
+
+const COLUMNAS_ORDENABLES = new Set([
+  "titulo",
+  "cliente_o_area",
+  "fecha_inicio_proceso",
+  "estado_nombre",
+  "prioridad",
+  "dias_open",
+]);
 
 export default async function VacantesPage({
   searchParams,
@@ -17,15 +27,22 @@ export default async function VacantesPage({
     reclutador?: string;
     cliente?: string;
     prioridad?: string;
+    sort?: string;
+    dir?: string;
   }>;
 }) {
-  const { estado, reclutador, cliente, prioridad } = await searchParams;
+  const resueltos = await searchParams;
+  const { estado, reclutador, cliente, prioridad } = resueltos;
+  const sort = resueltos.sort && COLUMNAS_ORDENABLES.has(resueltos.sort)
+    ? resueltos.sort
+    : "fecha_inicio_proceso";
+  const dir = resueltos.dir === "asc" ? "asc" : "desc";
   const supabase = await createClient();
 
   let consulta = supabase
     .from("vw_metricas_vacantes")
     .select("*")
-    .order("fecha_inicio_proceso", { ascending: false, nullsFirst: false });
+    .order(sort, { ascending: dir === "asc", nullsFirst: false });
   if (estado) consulta = consulta.eq("estado_id", estado);
   if (reclutador) consulta = consulta.eq("reclutador_responsable_id", reclutador);
   if (cliente) consulta = consulta.ilike("cliente_o_area", `%${cliente}%`);
@@ -38,6 +55,15 @@ export default async function VacantesPage({
   ]);
 
   const nombrePorId = new Map((equipo ?? []).map((p) => [p.id, p.nombre ?? p.email]));
+  const encabezado = (campo: string, etiqueta: string, ordenPorDefecto?: "asc" | "desc") => (
+    <EncabezadoOrdenable
+      campo={campo}
+      etiqueta={etiqueta}
+      basePath="/vacantes"
+      searchParams={resueltos}
+      ordenPorDefecto={ordenPorDefecto}
+    />
+  );
 
   return (
     <div className="mx-auto max-w-6xl p-8">
@@ -62,13 +88,13 @@ export default async function VacantesPage({
         <table className="w-full text-left text-sm">
           <thead className="bg-black/5 text-zinc-600 dark:bg-white/5 dark:text-zinc-400">
             <tr>
-              <th className="px-4 py-2">Título</th>
-              <th className="px-4 py-2">Cliente / área</th>
-              <th className="px-4 py-2">Fecha de inicio</th>
-              <th className="px-4 py-2">Estado</th>
-              <th className="px-4 py-2">Prioridad</th>
+              {encabezado("titulo", "Título")}
+              {encabezado("cliente_o_area", "Cliente / área")}
+              {encabezado("fecha_inicio_proceso", "Fecha de inicio", "desc")}
+              {encabezado("estado_nombre", "Estado")}
+              {encabezado("prioridad", "Prioridad")}
               <th className="px-4 py-2">Responsable</th>
-              <th className="px-4 py-2">Días open / TTF</th>
+              {encabezado("dias_open", "Días open / TTF", "desc")}
               <th className="px-4 py-2" />
             </tr>
           </thead>

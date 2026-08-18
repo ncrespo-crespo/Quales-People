@@ -1,12 +1,21 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { CandidatoConDias, Equipo, Vacante } from "@/lib/types";
+import { EncabezadoOrdenable } from "@/components/EncabezadoOrdenable";
 import { FiltrosCandidatos } from "./FiltrosCandidatos";
+import { alternarOcultoCandidato } from "./actions";
 
 function formatearFecha(fecha: string | null) {
   if (!fecha) return "—";
   return new Date(fecha).toLocaleDateString("es-AR");
 }
+
+const COLUMNAS_ORDENABLES = new Set([
+  "nombre_completo",
+  "etapa_actual",
+  "dias_en_etapa",
+  "fecha_ingreso",
+]);
 
 export default async function CandidatosPage({
   searchParams,
@@ -16,15 +25,24 @@ export default async function CandidatosPage({
     vacante?: string;
     reclutador?: string;
     origen?: string;
+    ocultos?: string;
+    sort?: string;
+    dir?: string;
   }>;
 }) {
-  const { etapa, vacante, reclutador, origen } = await searchParams;
+  const resueltos = await searchParams;
+  const { etapa, vacante, reclutador, origen, ocultos } = resueltos;
+  const sort = resueltos.sort && COLUMNAS_ORDENABLES.has(resueltos.sort)
+    ? resueltos.sort
+    : "fecha_ingreso";
+  const dir = resueltos.dir === "asc" ? "asc" : "desc";
   const supabase = await createClient();
 
   let consulta = supabase
     .from("vw_candidatos_pipeline")
     .select("*")
-    .order("fecha_ingreso", { ascending: false });
+    .order(sort, { ascending: dir === "asc", nullsFirst: false });
+  if (!ocultos) consulta = consulta.eq("oculto", false);
   if (etapa) consulta = consulta.eq("etapa_actual", etapa);
   if (vacante) consulta = consulta.eq("vacante_id", vacante);
   if (reclutador) consulta = consulta.eq("reclutador_asignado_id", reclutador);
@@ -38,6 +56,15 @@ export default async function CandidatosPage({
 
   const tituloVacantePorId = new Map((vacantes ?? []).map((v) => [v.id, v.titulo]));
   const nombrePorId = new Map((equipo ?? []).map((p) => [p.id, p.nombre ?? p.email]));
+  const encabezado = (campo: string, etiqueta: string, ordenPorDefecto?: "asc" | "desc") => (
+    <EncabezadoOrdenable
+      campo={campo}
+      etiqueta={etiqueta}
+      basePath="/candidatos"
+      searchParams={resueltos}
+      ordenPorDefecto={ordenPorDefecto}
+    />
+  );
 
   return (
     <div className="mx-auto max-w-6xl p-8">
@@ -61,25 +88,31 @@ export default async function CandidatosPage({
         vacantes={vacantes ?? []}
         equipo={equipo ?? []}
         incluirEtapa
+        incluirOcultos
       />
 
       <div className="overflow-x-auto rounded border border-black/10 dark:border-white/10">
         <table className="w-full text-left text-sm">
           <thead className="bg-black/5 text-zinc-600 dark:bg-white/5 dark:text-zinc-400">
             <tr>
-              <th className="px-4 py-2">Nombre</th>
+              {encabezado("nombre_completo", "Nombre")}
               <th className="px-4 py-2">Vacante</th>
-              <th className="px-4 py-2">Etapa</th>
-              <th className="px-4 py-2">Días en etapa</th>
+              {encabezado("etapa_actual", "Etapa")}
+              {encabezado("dias_en_etapa", "Días en etapa", "desc")}
               <th className="px-4 py-2">Reclutador</th>
-              <th className="px-4 py-2">Fecha de contacto</th>
+              {encabezado("fecha_ingreso", "Fecha de contacto", "desc")}
               <th className="px-4 py-2">LinkedIn</th>
               <th className="px-4 py-2" />
             </tr>
           </thead>
           <tbody>
             {(candidatos ?? []).map((candidato) => (
-              <tr key={candidato.id} className="border-t border-black/10 dark:border-white/10">
+              <tr
+                key={candidato.id}
+                className={`border-t border-black/10 dark:border-white/10 ${
+                  candidato.oculto ? "opacity-50" : ""
+                }`}
+              >
                 <td className="px-4 py-2 font-medium text-black dark:text-zinc-50">
                   <Link href={`/candidatos/${candidato.id}`} className="hover:underline">
                     {candidato.nombre_completo}
@@ -116,7 +149,18 @@ export default async function CandidatosPage({
                     "—"
                   )}
                 </td>
-                <td className="px-4 py-2 text-right">
+                <td className="px-4 py-2 text-right whitespace-nowrap">
+                  <form
+                    action={async () => {
+                      "use server";
+                      await alternarOcultoCandidato(candidato.id, !candidato.oculto);
+                    }}
+                    className="inline"
+                  >
+                    <button type="submit" className="mr-3 text-brand-blue hover:underline">
+                      {candidato.oculto ? "Mostrar" : "Ocultar"}
+                    </button>
+                  </form>
                   <Link
                     href={`/candidatos/${candidato.id}/editar`}
                     className="text-brand-blue hover:underline"

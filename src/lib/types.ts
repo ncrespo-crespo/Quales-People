@@ -81,6 +81,7 @@ export type Candidato = {
   origen: string | null;
   fecha_ingreso: string;
   descartado_motivo: string | null;
+  oculto: boolean;
 };
 
 export type CandidatoConDias = Candidato & {

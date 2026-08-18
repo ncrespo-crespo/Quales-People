@@ -7,12 +7,18 @@ import { TableroCandidatos } from "./TableroCandidatos";
 export default async function CandidatosKanbanPage({
   searchParams,
 }: {
-  searchParams: Promise<{ vacante?: string; reclutador?: string; origen?: string }>;
+  searchParams: Promise<{
+    vacante?: string;
+    reclutador?: string;
+    origen?: string;
+    ocultos?: string;
+  }>;
 }) {
-  const { vacante, reclutador, origen } = await searchParams;
+  const { vacante, reclutador, origen, ocultos } = await searchParams;
   const supabase = await createClient();
 
   let consulta = supabase.from("vw_candidatos_pipeline").select("*");
+  if (!ocultos) consulta = consulta.eq("oculto", false);
   if (vacante) consulta = consulta.eq("vacante_id", vacante);
   if (reclutador) consulta = consulta.eq("reclutador_asignado_id", reclutador);
   if (origen) consulta = consulta.eq("origen", origen);
@@ -36,7 +42,12 @@ export default async function CandidatosKanbanPage({
         </Link>
       </div>
       <div className="px-8">
-        <FiltrosCandidatos basePath="/candidatos/kanban" vacantes={vacantes ?? []} equipo={equipo ?? []} />
+        <FiltrosCandidatos
+          basePath="/candidatos/kanban"
+          vacantes={vacantes ?? []}
+          equipo={equipo ?? []}
+          incluirOcultos
+        />
       </div>
       <TableroCandidatos candidatosIniciales={candidatos ?? []} nombrePorId={nombrePorId} />
     </div>

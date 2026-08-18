@@ -9,6 +9,18 @@ function valorONulo(formData: FormData, campo: string) {
   return valor === null || valor === "" ? null : String(valor);
 }
 
+function valorNumero(formData: FormData, campo: string) {
+  const valor = valorONulo(formData, campo);
+  return valor === null ? null : Number(valor);
+}
+
+function valorBooleano(formData: FormData, campo: string) {
+  const valor = formData.get(campo);
+  if (valor === "true") return true;
+  if (valor === "false") return false;
+  return null;
+}
+
 async function subirCvSiCorresponde(
   supabase: Awaited<ReturnType<typeof createClient>>,
   candidatoId: string,
@@ -94,6 +106,7 @@ export async function actualizarCandidato(id: string, formData: FormData) {
     const { error } = await supabase
       .from("candidatos")
       .update({
+        // datos básicos
         nombre_completo: String(formData.get("nombre_completo")),
         email: valorONulo(formData, "email"),
         telefono: valorONulo(formData, "telefono"),
@@ -103,7 +116,59 @@ export async function actualizarCandidato(id: string, formData: FormData) {
         linkedin_url: valorONulo(formData, "linkedin_url"),
         origen: valorONulo(formData, "origen"),
         descartado_motivo: etapaNueva === "Descartado" ? motivoDescarte : null,
+        fecha_ingreso: valorONulo(formData, "fecha_ingreso") ?? new Date().toISOString(),
+        oculto: formData.get("oculto") === "on",
         ...(rutaCv ? { cv_url: rutaCv } : {}),
+        // perfil
+        apellido: valorONulo(formData, "apellido"),
+        pais: valorONulo(formData, "pais"),
+        provincia_estado: valorONulo(formData, "provincia_estado"),
+        localidad: valorONulo(formData, "localidad"),
+        genero: valorONulo(formData, "genero"),
+        fecha_nacimiento: valorONulo(formData, "fecha_nacimiento"),
+        area: valorONulo(formData, "area"),
+        formacion_tecnica: valorONulo(formData, "formacion_tecnica"),
+        anios_experiencia: valorNumero(formData, "anios_experiencia"),
+        experiencia_consultoria: valorBooleano(formData, "experiencia_consultoria"),
+        nivel_ingles: valorONulo(formData, "nivel_ingles"),
+        stack_principal: valorONulo(formData, "stack_principal"),
+        lugar_empleo_actual: valorONulo(formData, "lugar_empleo_actual"),
+        expectativa_salarial: valorONulo(formData, "expectativa_salarial"),
+        rate_fl: valorONulo(formData, "rate_fl"),
+        tipo_moneda: valorONulo(formData, "tipo_moneda"),
+        tipo_candidato: valorONulo(formData, "tipo_candidato"),
+        disponibilidad_ingreso: valorONulo(formData, "disponibilidad_ingreso"),
+        fuente_importada: valorONulo(formData, "fuente_importada"),
+        // proceso de selección
+        fecha_primer_contacto: valorONulo(formData, "fecha_primer_contacto"),
+        fecha_screening_hr: valorONulo(formData, "fecha_screening_hr"),
+        seniority_propuesto_hr: valorONulo(formData, "seniority_propuesto_hr"),
+        feedback_entrevista_hr: valorONulo(formData, "feedback_entrevista_hr"),
+        fecha_entrevista_area: valorONulo(formData, "fecha_entrevista_area"),
+        seniority_propuesto_area: valorONulo(formData, "seniority_propuesto_area"),
+        feedback_entrevista: valorONulo(formData, "feedback_entrevista"),
+        feedback_entrevista_area: valorONulo(formData, "feedback_entrevista_area"),
+        estado_final_importado: valorONulo(formData, "estado_final_importado"),
+        // oferta laboral
+        avanza_ol: valorBooleano(formData, "avanza_ol"),
+        fecha_envio_ol: valorONulo(formData, "fecha_envio_ol"),
+        aceptacion_ol: valorBooleano(formData, "aceptacion_ol"),
+        fecha_aceptacion_rechazo_ol: valorONulo(formData, "fecha_aceptacion_rechazo_ol"),
+        motivo_rechazo_ol: valorONulo(formData, "motivo_rechazo_ol"),
+        fecha_ingreso_efectiva: valorONulo(formData, "fecha_ingreso_efectiva"),
+        feedback_proceso_candidato: valorONulo(formData, "feedback_proceso_candidato"),
+        licencias_programadas: valorONulo(formData, "licencias_programadas"),
+        // onboarding
+        ob_cliente: valorONulo(formData, "ob_cliente"),
+        ob_proyecto: valorONulo(formData, "ob_proyecto"),
+        ob_induccion_empresa: valorONulo(formData, "ob_induccion_empresa"),
+        ob_induccion_empresa_horario: valorONulo(formData, "ob_induccion_empresa_horario"),
+        ob_induccion_area_responsable: valorONulo(formData, "ob_induccion_area_responsable"),
+        ob_induccion_area_horario: valorONulo(formData, "ob_induccion_area_horario"),
+        ob_induccion_proyecto_responsable: valorONulo(formData, "ob_induccion_proyecto_responsable"),
+        ob_induccion_proyecto_horario: valorONulo(formData, "ob_induccion_proyecto_horario"),
+        ob_fecha_envio_elementos: valorONulo(formData, "ob_fecha_envio_elementos"),
+        ob_fecha_recepcion_elementos: valorONulo(formData, "ob_fecha_recepcion_elementos"),
       })
       .eq("id", id);
 
@@ -164,6 +229,19 @@ export async function moverCandidato(
     movido_por_id: user!.id,
     nota,
   });
+
+  revalidatePath("/candidatos");
+  revalidatePath("/candidatos/kanban");
+  return { error: null };
+}
+
+export async function alternarOcultoCandidato(id: string, oculto: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("candidatos").update({ oculto }).eq("id", id);
+
+  if (error) {
+    return { error: error.message };
+  }
 
   revalidatePath("/candidatos");
   revalidatePath("/candidatos/kanban");

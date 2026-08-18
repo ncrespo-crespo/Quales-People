@@ -46,6 +46,15 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
   llega un mail de Supabase para poner su contraseña) y editar
   rol/estado activo de cada miembro, sin tocar la base a mano. Requiere
   la variable de entorno `SUPABASE_SERVICE_ROLE_KEY` (ver más abajo).
+- Mejoras varias: tipografía Poppins en toda la app (igual que
+  qualesgroup.com); fondo sólido en los `<select>` para que se lean bien
+  las opciones en cualquier navegador/tema; columnas ordenables con clic
+  en el encabezado en los listados de vacantes y candidatos; el
+  formulario de editar candidato ahora expone todos los campos
+  (incluida la fecha de contacto), agrupados en secciones plegables; y
+  la posibilidad de ocultar un candidato del listado/tablero sin
+  borrarlo (`candidatos.oculto`, con un checkbox "Mostrar ocultos" para
+  volver a verlos).
 
 El resto de las funcionalidades (dashboard de métricas, Gmail) se
 construyen en las fases siguientes (ver el PRD, sección 6 — Roadmap de
@@ -71,11 +80,18 @@ Esto crea las tablas (`equipo`, `vacantes`, `estados_vacante`, `candidatos`,
 `historial_etapas`, `notas_entrevistas`, `comunicaciones`), la vista
 `vw_metricas_vacantes` y los 9 estados iniciales de vacante.
 
-Después correr también, en orden: `0002_storage_cvs.sql` (bucket privado
-`cvs`), `0003_ampliacion_vacantes.sql` y `0004_ampliacion_candidatos.sql`
-(campos que salen de la planilla real de reclutamiento — ver más abajo), y
-`0005_vista_candidatos_pipeline.sql` (días en la etapa actual, para el
-tablero de candidatos).
+Después correr también, en orden:
+
+- `0002_storage_cvs.sql` — bucket privado `cvs`.
+- `0003_ampliacion_vacantes.sql` y `0004_ampliacion_candidatos.sql` —
+  campos que salen de la planilla real de reclutamiento (ver más abajo).
+- `0005_vista_candidatos_pipeline.sql` — días en la etapa actual, para el
+  tablero de candidatos.
+- `0006_prioridad_vacantes.sql` — prioridad de la búsqueda.
+- `0007_rol_desde_invitacion.sql` — el alta de equipo respeta el rol
+  elegido al invitar (ver "Alta de usuarios del equipo").
+- `0008_ocultar_candidatos.sql` — permite ocultar un candidato del
+  listado/tablero sin borrarlo.
 
 ### Carga inicial desde la planilla de reclutamiento
 
