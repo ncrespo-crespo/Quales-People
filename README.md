@@ -100,6 +100,29 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
   crear un candidato, en postulaciones y en los filtros) ahora muestran
   cliente y fecha de inicio además del título, para distinguir búsquedas
   con el mismo nombre.
+- Vacantes ampliadas (migración 0012): igual que los candidatos, ahora se
+  pueden ocultar del listado/tablero sin borrarlas (`vacantes.oculto`,
+  checkbox "Mostrar ocultas"). Suman stack principal, nivel de inglés,
+  ubicación (provincia/estado y localidad — el país ya existía),
+  modalidad de trabajo (On Site / Híbrido / Remoto), banda salarial y un
+  check de "acepta freelance". El candidato suma "remuneración
+  pretendida" (distinta de la expectativa salarial de una postulación
+  puntual, que vive en `postulaciones`).
+- `/vacantes/:id`: ficha de la vacante (antes solo se podía editar, no
+  ver el detalle). Muestra todos sus datos y la lista de postulantes con
+  etapa, reclutador y fecha — antes esa relación vacante↔candidato no se
+  veía en ningún lado. El listado de `/vacantes` suma una columna
+  "Postulantes" con la cantidad.
+- `/match` (pestaña nueva): elegís una vacante y sugiere candidatos que
+  todavía no están postulados a ella, por coincidencia de stack
+  principal, nivel de inglés y ubicación (heurística de texto, no IA —
+  pensada para iterar). Desde ahí se puede postular directo con un
+  botón. También se llega filtrado desde la ficha de la vacante ("Ver
+  candidatos sugeridos").
+- Todos los filtros de selección de los listados (vacantes, candidatos,
+  tablero de postulaciones, Overview) pasan a ser de selección múltiple
+  — se puede filtrar por varios estados, reclutadores, orígenes, etc. a
+  la vez (`src/components/FiltroMultiple.tsx`).
 
 El resto de las funcionalidades (Gmail) se
 construyen en las fases siguientes (ver el PRD, sección 6 — Roadmap de
@@ -175,6 +198,12 @@ Después correr también, en orden:
     esas columnas viejas quedan sin usarse desde la app (no se pueden
     convertir solas a fecha sin arriesgar datos): se pueden borrar más
     adelante a mano si están vacías.
+- `0012_vacantes_ampliadas.sql` — `vacantes` suma `oculto` (mismo
+  criterio que `candidatos.oculto`), `stack_principal`, `nivel_ingles`,
+  `provincia_estado`, `localidad` (el país ya existía desde la 0003),
+  `modalidad_trabajo` (`On Site` / `Híbrido` / `Remoto`, con check
+  constraint), `banda_salarial` y `acepta_freelance`. `candidatos` suma
+  `remuneracion_pretendida`.
 
 ### Carga inicial desde la planilla de reclutamiento
 

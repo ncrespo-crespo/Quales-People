@@ -1,5 +1,5 @@
 import type { Equipo, EstadoVacante, Vacante } from "@/lib/types";
-import { PRIORIDADES_VACANTE } from "@/lib/types";
+import { MODALIDADES_TRABAJO, PRIORIDADES_VACANTE } from "@/lib/types";
 
 export function FormularioVacante({
   action,
@@ -121,6 +121,72 @@ export function FormularioVacante({
         </Campo>
       )}
 
+      <Campo label="Stack principal">
+        <input
+          name="stack_principal"
+          placeholder="SQL, Snowflake, Power BI..."
+          defaultValue={vacante?.stack_principal ?? ""}
+          className="campo"
+        />
+      </Campo>
+
+      <Campo label="Nivel de inglés">
+        <input
+          name="nivel_ingles"
+          defaultValue={vacante?.nivel_ingles ?? ""}
+          className="campo"
+        />
+      </Campo>
+
+      <div className="flex gap-2">
+        <Campo label="País">
+          <input name="pais" defaultValue={vacante?.pais ?? ""} className="campo" />
+        </Campo>
+        <Campo label="Provincia / estado">
+          <input
+            name="provincia_estado"
+            defaultValue={vacante?.provincia_estado ?? ""}
+            className="campo"
+          />
+        </Campo>
+        <Campo label="Localidad">
+          <input name="localidad" defaultValue={vacante?.localidad ?? ""} className="campo" />
+        </Campo>
+      </div>
+
+      <Campo label="Modalidad de trabajo">
+        <select
+          name="modalidad_trabajo"
+          defaultValue={vacante?.modalidad_trabajo ?? ""}
+          className="campo"
+        >
+          <option value="">Sin definir</option>
+          {MODALIDADES_TRABAJO.map((m) => (
+            <option key={m} value={m}>
+              {m}
+            </option>
+          ))}
+        </select>
+      </Campo>
+
+      <Campo label="Banda salarial">
+        <input
+          name="banda_salarial"
+          placeholder="Ej: USD 2000-3000"
+          defaultValue={vacante?.banda_salarial ?? ""}
+          className="campo"
+        />
+      </Campo>
+
+      <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+        <input
+          type="checkbox"
+          name="acepta_freelance"
+          defaultChecked={vacante?.acepta_freelance ?? false}
+        />
+        Acepta freelance
+      </label>
+
       <Campo label="Notas">
         <textarea
           name="notas"
@@ -139,6 +205,13 @@ export function FormularioVacante({
           className="campo"
         />
       </Campo>
+
+      {vacante && (
+        <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+          <input type="checkbox" name="oculto" defaultChecked={vacante.oculto} />
+          Ocultar de los listados y el tablero
+        </label>
+      )}
 
       <button
         type="submit"

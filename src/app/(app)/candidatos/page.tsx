@@ -48,7 +48,7 @@ export default async function CandidatosPage({
     const { data: postulacionesDeVacante } = await supabase
       .from("postulaciones")
       .select("candidato_id")
-      .eq("vacante_id", vacante);
+      .in("vacante_id", vacante.split(","));
     idsPorVacante = (postulacionesDeVacante ?? []).map((p) => p.candidato_id);
   }
 
@@ -60,9 +60,9 @@ export default async function CandidatosPage({
     .order(sort, { ascending: dir === "asc", nullsFirst: false });
   if (!ocultos) consulta = consulta.eq("oculto", false);
   if (q) consulta = consulta.ilike("nombre_completo", `%${q}%`);
-  if (origen) consulta = consulta.eq("origen", origen);
-  if (provincia) consulta = consulta.eq("provincia_estado", provincia);
-  if (ingles) consulta = consulta.eq("nivel_ingles", ingles);
+  if (origen) consulta = consulta.in("origen", origen.split(","));
+  if (provincia) consulta = consulta.in("provincia_estado", provincia.split(","));
+  if (ingles) consulta = consulta.in("nivel_ingles", ingles.split(","));
   if (stack) consulta = consulta.ilike("stack_principal", `%${stack}%`);
   if (idsPorVacante) consulta = consulta.in("id", idsPorVacante.length ? idsPorVacante : [ID_INEXISTENTE]);
 

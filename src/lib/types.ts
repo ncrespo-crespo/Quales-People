@@ -28,6 +28,9 @@ export const DIAS_OPEN_CRITICO = 3;
 export const ANIO_POR_DEFECTO = 2026;
 export const ANIOS_DISPONIBLES = [2024, 2025, 2026, 2027] as const;
 
+export const MODALIDADES_TRABAJO = ["On Site", "Híbrido", "Remoto"] as const;
+export type ModalidadTrabajo = (typeof MODALIDADES_TRABAJO)[number];
+
 export type Vacante = {
   id: string;
   titulo: string;
@@ -41,6 +44,15 @@ export type Vacante = {
   notas: string | null;
   drive_url: string | null;
   prioridad: PrioridadVacante;
+  oculto: boolean;
+  stack_principal: string | null;
+  nivel_ingles: string | null;
+  pais: string | null;
+  provincia_estado: string | null;
+  localidad: string | null;
+  modalidad_trabajo: ModalidadTrabajo | null;
+  banda_salarial: string | null;
+  acepta_freelance: boolean;
 };
 
 export type VacanteConMetricas = Vacante & {
@@ -109,6 +121,7 @@ export type CandidatoPerfil = {
   stack_principal: string | null;
   lugar_empleo_actual: string | null;
   rate_fl: string | null;
+  remuneracion_pretendida: string | null;
   fuente_importada: string | null;
 };
 

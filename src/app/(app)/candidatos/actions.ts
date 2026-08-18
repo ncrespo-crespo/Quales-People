@@ -95,6 +95,7 @@ export async function crearCandidato(formData: FormData) {
       stack_principal: valorONulo(formData, "stack_principal"),
       lugar_empleo_actual: valorONulo(formData, "lugar_empleo_actual"),
       rate_fl: valorONulo(formData, "rate_fl"),
+      remuneracion_pretendida: valorONulo(formData, "remuneracion_pretendida"),
     })
     .select("id")
     .single();
@@ -175,6 +176,7 @@ export async function actualizarCandidato(id: string, formData: FormData) {
         stack_principal: valorONulo(formData, "stack_principal"),
         lugar_empleo_actual: valorONulo(formData, "lugar_empleo_actual"),
         rate_fl: valorONulo(formData, "rate_fl"),
+        remuneracion_pretendida: valorONulo(formData, "remuneracion_pretendida"),
         fuente_importada: valorONulo(formData, "fuente_importada"),
       })
       .eq("id", id);

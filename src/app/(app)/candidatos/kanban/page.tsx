@@ -22,11 +22,11 @@ export default async function CandidatosKanbanPage({
 
   let consulta = supabase.from("vw_postulaciones_pipeline").select("*");
   if (!ocultos) consulta = consulta.eq("candidato_oculto", false);
-  if (vacante) consulta = consulta.eq("vacante_id", vacante);
-  if (reclutador) consulta = consulta.eq("reclutador_asignado_id", reclutador);
-  if (origen) consulta = consulta.eq("candidato_origen", origen);
-  if (provincia) consulta = consulta.eq("candidato_provincia_estado", provincia);
-  if (ingles) consulta = consulta.eq("candidato_nivel_ingles", ingles);
+  if (vacante) consulta = consulta.in("vacante_id", vacante.split(","));
+  if (reclutador) consulta = consulta.in("reclutador_asignado_id", reclutador.split(","));
+  if (origen) consulta = consulta.in("candidato_origen", origen.split(","));
+  if (provincia) consulta = consulta.in("candidato_provincia_estado", provincia.split(","));
+  if (ingles) consulta = consulta.in("candidato_nivel_ingles", ingles.split(","));
   if (stack) consulta = consulta.ilike("candidato_stack_principal", `%${stack}%`);
 
   const [{ data: postulaciones }, { data: vacantes }, { data: equipo }, { data: perfiles }] =

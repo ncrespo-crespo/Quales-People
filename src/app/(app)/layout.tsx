@@ -34,6 +34,9 @@ export default async function AppLayout({
           <Link href="/candidatos" className="hover:text-white">
             Candidatos
           </Link>
+          <Link href="/match" className="hover:text-white">
+            Match
+          </Link>
           {perfil?.rol === "admin" && (
             <Link href="/configuracion" className="hover:text-white">
               Configuración

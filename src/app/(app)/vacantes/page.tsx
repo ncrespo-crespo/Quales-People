@@ -6,6 +6,7 @@ import { rangoAnio } from "@/lib/fechas";
 import { EncabezadoOrdenable } from "@/components/EncabezadoOrdenable";
 import { FiltroAnio } from "@/components/FiltroAnio";
 import { FiltrosVacantes } from "./FiltrosVacantes";
+import { alternarOcultoVacante } from "./actions";
 import { esCritico, InsigniaCritico, InsigniaPrioridad } from "./insignias";
 
 function formatearFecha(fecha: string | null) {
@@ -30,13 +31,14 @@ export default async function VacantesPage({
     reclutador?: string;
     cliente?: string;
     prioridad?: string;
+    ocultos?: string;
     anio?: string;
     sort?: string;
     dir?: string;
   }>;
 }) {
   const resueltos = await searchParams;
-  const { estado, reclutador, cliente, prioridad } = resueltos;
+  const { estado, reclutador, cliente, prioridad, ocultos } = resueltos;
   const anio = Number(resueltos.anio) || ANIO_POR_DEFECTO;
   const sort = resueltos.sort && COLUMNAS_ORDENABLES.has(resueltos.sort)
     ? resueltos.sort
@@ -51,18 +53,26 @@ export default async function VacantesPage({
     .gte("fecha_inicio_proceso", desde)
     .lt("fecha_inicio_proceso", hasta)
     .order(sort, { ascending: dir === "asc", nullsFirst: false });
-  if (estado) consulta = consulta.eq("estado_id", estado);
-  if (reclutador) consulta = consulta.eq("reclutador_responsable_id", reclutador);
+  if (estado) consulta = consulta.in("estado_id", estado.split(","));
+  if (reclutador) consulta = consulta.in("reclutador_responsable_id", reclutador.split(","));
   if (cliente) consulta = consulta.ilike("cliente_o_area", `%${cliente}%`);
-  if (prioridad) consulta = consulta.eq("prioridad", prioridad);
+  if (prioridad) consulta = consulta.in("prioridad", prioridad.split(","));
+  if (!ocultos) consulta = consulta.eq("oculto", false);
 
-  const [{ data: vacantes }, { data: estados }, { data: equipo }] = await Promise.all([
-    consulta.returns<VacanteConMetricas[]>(),
-    supabase.from("estados_vacante").select("*").order("orden").returns<EstadoVacante[]>(),
-    supabase.from("equipo").select("*").returns<Equipo[]>(),
-  ]);
+  const [{ data: vacantes }, { data: estados }, { data: equipo }, { data: postulaciones }] =
+    await Promise.all([
+      consulta.returns<VacanteConMetricas[]>(),
+      supabase.from("estados_vacante").select("*").order("orden").returns<EstadoVacante[]>(),
+      supabase.from("equipo").select("*").returns<Equipo[]>(),
+      supabase.from("postulaciones").select("vacante_id").returns<{ vacante_id: string | null }[]>(),
+    ]);
 
   const nombrePorId = new Map((equipo ?? []).map((p) => [p.id, p.nombre ?? p.email]));
+  const postulantesPorVacante = new Map<string, number>();
+  for (const p of postulaciones ?? []) {
+    if (!p.vacante_id) continue;
+    postulantesPorVacante.set(p.vacante_id, (postulantesPorVacante.get(p.vacante_id) ?? 0) + 1);
+  }
   const encabezado = (campo: string, etiqueta: string, ordenPorDefecto?: "asc" | "desc") => (
     <EncabezadoOrdenable
       campo={campo}
@@ -106,14 +116,22 @@ export default async function VacantesPage({
               {encabezado("prioridad", "Prioridad")}
               <th className="px-4 py-2">Responsable</th>
               {encabezado("dias_open", "Días open / TTF", "desc")}
+              <th className="px-4 py-2">Postulantes</th>
               <th className="px-4 py-2" />
             </tr>
           </thead>
           <tbody>
             {(vacantes ?? []).map((vacante) => (
-              <tr key={vacante.id} className="border-t border-black/10 dark:border-white/10">
+              <tr
+                key={vacante.id}
+                className={`border-t border-black/10 dark:border-white/10 ${
+                  vacante.oculto ? "opacity-50" : ""
+                }`}
+              >
                 <td className="px-4 py-2 font-medium text-black dark:text-zinc-50">
-                  {vacante.titulo}
+                  <Link href={`/vacantes/${vacante.id}`} className="hover:underline">
+                    {vacante.titulo}
+                  </Link>
                 </td>
                 <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
                   {vacante.cliente_o_area ?? "—"}
@@ -149,6 +167,9 @@ export default async function VacantesPage({
                     {esCritico(vacante.dias_open) && <InsigniaCritico />}
                   </div>
                 </td>
+                <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
+                  {postulantesPorVacante.get(vacante.id) ?? 0}
+                </td>
                 <td className="px-4 py-2 text-right whitespace-nowrap">
                   {vacante.drive_url && (
                     <a
@@ -160,6 +181,17 @@ export default async function VacantesPage({
                       Placa
                     </a>
                   )}
+                  <form
+                    action={async () => {
+                      "use server";
+                      await alternarOcultoVacante(vacante.id, !vacante.oculto);
+                    }}
+                    className="inline"
+                  >
+                    <button type="submit" className="mr-3 text-brand-blue hover:underline">
+                      {vacante.oculto ? "Mostrar" : "Ocultar"}
+                    </button>
+                  </form>
                   <Link
                     href={`/vacantes/${vacante.id}/editar`}
                     className="text-brand-blue hover:underline"
@@ -171,7 +203,7 @@ export default async function VacantesPage({
             ))}
             {(vacantes ?? []).length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-zinc-500">
+                <td colSpan={9} className="px-4 py-8 text-center text-zinc-500">
                   Todavía no hay vacantes cargadas.
                 </td>
               </tr>

@@ -9,6 +9,10 @@ function valorONulo(formData: FormData, campo: string) {
   return valor === null || valor === "" ? null : String(valor);
 }
 
+function valorBooleano(formData: FormData, campo: string) {
+  return formData.get(campo) === "on";
+}
+
 export async function crearVacante(formData: FormData) {
   const supabase = await createClient();
 
@@ -22,6 +26,14 @@ export async function crearVacante(formData: FormData) {
     notas: valorONulo(formData, "notas"),
     drive_url: valorONulo(formData, "drive_url"),
     prioridad: String(formData.get("prioridad")),
+    stack_principal: valorONulo(formData, "stack_principal"),
+    nivel_ingles: valorONulo(formData, "nivel_ingles"),
+    pais: valorONulo(formData, "pais"),
+    provincia_estado: valorONulo(formData, "provincia_estado"),
+    localidad: valorONulo(formData, "localidad"),
+    modalidad_trabajo: valorONulo(formData, "modalidad_trabajo"),
+    banda_salarial: valorONulo(formData, "banda_salarial"),
+    acepta_freelance: valorBooleano(formData, "acepta_freelance"),
   });
 
   if (error) {
@@ -48,6 +60,15 @@ export async function actualizarVacante(id: string, formData: FormData) {
       notas: valorONulo(formData, "notas"),
       drive_url: valorONulo(formData, "drive_url"),
       prioridad: String(formData.get("prioridad")),
+      oculto: valorBooleano(formData, "oculto"),
+      stack_principal: valorONulo(formData, "stack_principal"),
+      nivel_ingles: valorONulo(formData, "nivel_ingles"),
+      pais: valorONulo(formData, "pais"),
+      provincia_estado: valorONulo(formData, "provincia_estado"),
+      localidad: valorONulo(formData, "localidad"),
+      modalidad_trabajo: valorONulo(formData, "modalidad_trabajo"),
+      banda_salarial: valorONulo(formData, "banda_salarial"),
+      acepta_freelance: valorBooleano(formData, "acepta_freelance"),
     })
     .eq("id", id);
 
@@ -57,6 +78,19 @@ export async function actualizarVacante(id: string, formData: FormData) {
 
   revalidatePath("/vacantes");
   redirect("/vacantes");
+}
+
+export async function alternarOcultoVacante(id: string, oculto: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("vacantes").update({ oculto }).eq("id", id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/vacantes");
+  revalidatePath("/vacantes/kanban");
+  return { error: null };
 }
 
 export async function moverVacante(id: string, estadoId: string) {

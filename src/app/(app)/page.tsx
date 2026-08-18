@@ -22,9 +22,10 @@ export default async function OverviewPage({
   let consulta = supabase
     .from("vw_metricas_vacantes")
     .select("*")
+    .eq("oculto", false)
     .gte("fecha_inicio_proceso", desde)
     .lt("fecha_inicio_proceso", hasta);
-  if (reclutador) consulta = consulta.eq("reclutador_responsable_id", reclutador);
+  if (reclutador) consulta = consulta.in("reclutador_responsable_id", reclutador.split(","));
 
   const [{ data: vacantes }, { data: equipo }] = await Promise.all([
     consulta.returns<VacanteConMetricas[]>(),

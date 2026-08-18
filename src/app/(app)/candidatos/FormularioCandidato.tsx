@@ -195,6 +195,7 @@ const CAMPOS_PERFIL: CampoSpec[] = [
   { name: "nivel_ingles", label: "Nivel de inglés" },
   { name: "stack_principal", label: "Stack principal" },
   { name: "lugar_empleo_actual", label: "Lugar de empleo actual" },
+  { name: "remuneracion_pretendida", label: "Remuneración pretendida" },
   { name: "rate_fl", label: "Rate freelance" },
   { name: "fuente_importada", label: "Fuente" },
 ];

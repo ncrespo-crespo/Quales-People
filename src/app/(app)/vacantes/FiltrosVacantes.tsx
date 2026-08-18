@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Equipo, EstadoVacante } from "@/lib/types";
 import { PRIORIDADES_VACANTE } from "@/lib/types";
+import { FiltroMultiple } from "@/components/FiltroMultiple";
 
 export function FiltrosVacantes({
   estados,
@@ -26,44 +27,26 @@ export function FiltrosVacantes({
 
   return (
     <>
-      <select
-        className="campo"
-        defaultValue={searchParams.get("estado") ?? ""}
-        onChange={(e) => actualizar("estado", e.target.value)}
-      >
-        <option value="">Todos los estados</option>
-        {estados.map((e) => (
-          <option key={e.id} value={e.id}>
-            {e.nombre}
-          </option>
-        ))}
-      </select>
+      <FiltroMultiple
+        campo="estado"
+        basePath="/vacantes"
+        etiquetaTodos="Todos los estados"
+        opciones={estados.map((e) => ({ value: e.id, label: e.nombre }))}
+      />
 
-      <select
-        className="campo"
-        defaultValue={searchParams.get("reclutador") ?? ""}
-        onChange={(e) => actualizar("reclutador", e.target.value)}
-      >
-        <option value="">Todos los reclutadores</option>
-        {equipo.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.nombre ?? p.email}
-          </option>
-        ))}
-      </select>
+      <FiltroMultiple
+        campo="reclutador"
+        basePath="/vacantes"
+        etiquetaTodos="Todos los reclutadores"
+        opciones={equipo.map((p) => ({ value: p.id, label: p.nombre ?? p.email }))}
+      />
 
-      <select
-        className="campo"
-        defaultValue={searchParams.get("prioridad") ?? ""}
-        onChange={(e) => actualizar("prioridad", e.target.value)}
-      >
-        <option value="">Todas las prioridades</option>
-        {PRIORIDADES_VACANTE.map((p) => (
-          <option key={p} value={p}>
-            {p}
-          </option>
-        ))}
-      </select>
+      <FiltroMultiple
+        campo="prioridad"
+        basePath="/vacantes"
+        etiquetaTodos="Todas las prioridades"
+        opciones={PRIORIDADES_VACANTE.map((p) => ({ value: p, label: p }))}
+      />
 
       <input
         className="campo"
@@ -71,6 +54,15 @@ export function FiltrosVacantes({
         defaultValue={searchParams.get("cliente") ?? ""}
         onChange={(e) => actualizar("cliente", e.target.value)}
       />
+
+      <label className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400">
+        <input
+          type="checkbox"
+          defaultChecked={searchParams.get("ocultos") === "1"}
+          onChange={(e) => actualizar("ocultos", e.target.checked ? "1" : "")}
+        />
+        Mostrar ocultas
+      </label>
     </>
   );
 }

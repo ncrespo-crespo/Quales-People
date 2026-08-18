@@ -8,7 +8,11 @@ export default async function VacantesKanbanPage() {
 
   const [{ data: estados }, { data: vacantes }, { data: equipo }] = await Promise.all([
     supabase.from("estados_vacante").select("*").order("orden").returns<EstadoVacante[]>(),
-    supabase.from("vw_metricas_vacantes").select("*").returns<VacanteConMetricas[]>(),
+    supabase
+      .from("vw_metricas_vacantes")
+      .select("*")
+      .eq("oculto", false)
+      .returns<VacanteConMetricas[]>(),
     supabase.from("equipo").select("*").returns<Equipo[]>(),
   ]);
 

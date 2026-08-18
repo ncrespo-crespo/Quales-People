@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { Equipo, Vacante } from "@/lib/types";
 import { ORIGENES_CANDIDATO } from "@/lib/types";
 import { etiquetaVacante } from "@/lib/vacantes";
+import { FiltroMultiple } from "@/components/FiltroMultiple";
 
 export function FiltrosCandidatos({
   basePath,
@@ -35,57 +36,33 @@ export function FiltrosCandidatos({
 
   return (
     <>
-      <select
-        className="campo"
-        defaultValue={searchParams.get("vacante") ?? ""}
-        onChange={(e) => actualizar("vacante", e.target.value)}
-      >
-        <option value="">Todas las vacantes</option>
-        {vacantes.map((v) => (
-          <option key={v.id} value={v.id}>
-            {etiquetaVacante(v)}
-          </option>
-        ))}
-      </select>
+      <FiltroMultiple
+        campo="vacante"
+        basePath={basePath}
+        etiquetaTodos="Todas las vacantes"
+        opciones={vacantes.map((v) => ({ value: v.id, label: etiquetaVacante(v) }))}
+      />
 
-      <select
-        className="campo"
-        defaultValue={searchParams.get("reclutador") ?? ""}
-        onChange={(e) => actualizar("reclutador", e.target.value)}
-      >
-        <option value="">Todos los reclutadores</option>
-        {equipo.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.nombre ?? p.email}
-          </option>
-        ))}
-      </select>
+      <FiltroMultiple
+        campo="reclutador"
+        basePath={basePath}
+        etiquetaTodos="Todos los reclutadores"
+        opciones={equipo.map((p) => ({ value: p.id, label: p.nombre ?? p.email }))}
+      />
 
-      <select
-        className="campo"
-        defaultValue={searchParams.get("provincia") ?? ""}
-        onChange={(e) => actualizar("provincia", e.target.value)}
-      >
-        <option value="">Toda provincia / estado</option>
-        {provincias.map((p) => (
-          <option key={p} value={p}>
-            {p}
-          </option>
-        ))}
-      </select>
+      <FiltroMultiple
+        campo="provincia"
+        basePath={basePath}
+        etiquetaTodos="Toda provincia / estado"
+        opciones={provincias.map((p) => ({ value: p, label: p }))}
+      />
 
-      <select
-        className="campo"
-        defaultValue={searchParams.get("ingles") ?? ""}
-        onChange={(e) => actualizar("ingles", e.target.value)}
-      >
-        <option value="">Todo nivel de inglés</option>
-        {nivelesIngles.map((n) => (
-          <option key={n} value={n}>
-            {n}
-          </option>
-        ))}
-      </select>
+      <FiltroMultiple
+        campo="ingles"
+        basePath={basePath}
+        etiquetaTodos="Todo nivel de inglés"
+        opciones={nivelesIngles.map((n) => ({ value: n, label: n }))}
+      />
 
       <input
         className="campo"
@@ -94,18 +71,12 @@ export function FiltrosCandidatos({
         onChange={(e) => actualizar("stack", e.target.value)}
       />
 
-      <select
-        className="campo"
-        defaultValue={searchParams.get("origen") ?? ""}
-        onChange={(e) => actualizar("origen", e.target.value)}
-      >
-        <option value="">Todos los orígenes</option>
-        {ORIGENES_CANDIDATO.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
-      </select>
+      <FiltroMultiple
+        campo="origen"
+        basePath={basePath}
+        etiquetaTodos="Todos los orígenes"
+        opciones={ORIGENES_CANDIDATO.map((o) => ({ value: o, label: o }))}
+      />
 
       {incluirOcultos && (
         <label className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400">
