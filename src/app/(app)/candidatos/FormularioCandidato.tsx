@@ -1,5 +1,7 @@
+import Link from "next/link";
 import type { CandidatoCompleto, Equipo, Vacante } from "@/lib/types";
 import { ORIGENES_CANDIDATO } from "@/lib/types";
+import { etiquetaVacante } from "@/lib/vacantes";
 
 export function FormularioCandidato({
   action,
@@ -90,7 +92,7 @@ export function FormularioCandidato({
               <option value="">Sin vacante todavía</option>
               {vacantes.map((vacante) => (
                 <option key={vacante.id} value={vacante.id}>
-                  {vacante.titulo}
+                  {etiquetaVacante(vacante)}
                 </option>
               ))}
             </select>
@@ -106,6 +108,17 @@ export function FormularioCandidato({
             </select>
           </Campo>
         </>
+      )}
+
+      {candidato && (
+        <p className="rounded border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs text-zinc-700 dark:text-zinc-300">
+          Para vincular otra vacante, cambiar la etapa o ver el historial de sus
+          postulaciones, hacelo desde{" "}
+          <Link href={`/candidatos/${candidato.id}`} className="text-brand-blue hover:underline">
+            la ficha del candidato
+          </Link>
+          , en la sección &quot;Postulaciones&quot;.
+        </p>
       )}
 
       <Campo label={urlCvActual ? "Reemplazar CV" : "CV"}>
@@ -129,7 +142,7 @@ export function FormularioCandidato({
         </label>
       )}
 
-      {candidato && <SeccionPerfil candidato={candidato} />}
+      <SeccionPerfil candidato={candidato} />
 
       <button
         type="submit"
@@ -171,15 +184,15 @@ const CAMPOS_PERFIL: CampoSpec[] = [
   { name: "fuente_importada", label: "Fuente" },
 ];
 
-function SeccionPerfil({ candidato }: { candidato: CandidatoCompleto }) {
+function SeccionPerfil({ candidato }: { candidato?: CandidatoCompleto }) {
   return (
-    <details className="rounded border border-black/10 p-3 dark:border-white/10">
+    <details open className="rounded border border-black/10 p-3 dark:border-white/10">
       <summary className="cursor-pointer text-sm font-medium text-black dark:text-zinc-50">
         Perfil
       </summary>
       <div className="mt-3 flex flex-col gap-3">
         {CAMPOS_PERFIL.map((campo) => (
-          <CampoDinamico key={campo.name} campo={campo} valor={candidato[campo.name]} />
+          <CampoDinamico key={campo.name} campo={campo} valor={candidato?.[campo.name]} />
         ))}
       </div>
     </details>

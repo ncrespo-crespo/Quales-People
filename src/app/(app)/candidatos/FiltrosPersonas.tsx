@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Vacante } from "@/lib/types";
 import { ORIGENES_CANDIDATO } from "@/lib/types";
+import { etiquetaVacante } from "@/lib/vacantes";
 
 export function FiltrosPersonas({
   vacantes,
@@ -36,7 +37,7 @@ export function FiltrosPersonas({
         <option value="">Todas las postulaciones</option>
         {vacantes.map((v) => (
           <option key={v.id} value={v.id}>
-            {v.titulo}
+            {etiquetaVacante(v)}
           </option>
         ))}
       </select>

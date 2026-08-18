@@ -11,6 +11,7 @@ import type {
   Vacante,
 } from "@/lib/types";
 import { agregarComunicacion, agregarNotaEntrevista } from "./actions";
+import { BotonEliminarCandidato } from "./BotonEliminarCandidato";
 import { SeccionPostulaciones } from "./Postulaciones";
 import { TIPOS_COMUNICACION } from "@/lib/types";
 
@@ -21,11 +22,24 @@ function formatearFecha(fecha: string | null) {
 
 export default async function FichaCandidatoPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { id } = await params;
+  const { error: errorParam } = await searchParams;
   const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: perfilUsuario } = await supabase
+    .from("equipo")
+    .select("rol")
+    .eq("id", user!.id)
+    .single();
+  const esAdmin = perfilUsuario?.rol === "admin";
 
   const [
     { data: candidato },
@@ -104,8 +118,17 @@ export default async function FichaCandidatoPage({
           <Link href={`/candidatos/${id}/editar`} className="text-brand-blue hover:underline">
             Editar
           </Link>
+          {esAdmin && (
+            <BotonEliminarCandidato id={id} nombre={candidato.nombre_completo} />
+          )}
         </div>
       </div>
+
+      {errorParam && (
+        <p className="mb-6 rounded bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+          {errorParam}
+        </p>
+      )}
 
       <Seccion titulo="Datos">
         <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">

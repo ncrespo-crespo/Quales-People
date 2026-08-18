@@ -1,5 +1,6 @@
 import { ETAPAS_CANDIDATO } from "@/lib/types";
 import type { Equipo, HistorialEtapa, Postulacion, Vacante } from "@/lib/types";
+import { etiquetaVacante } from "@/lib/vacantes";
 import {
   actualizarPostulacion,
   crearPostulacion,
@@ -118,7 +119,7 @@ export function SeccionPostulaciones({
                     <option value="">Sin vacante asignada</option>
                     {vacantes.map((v) => (
                       <option key={v.id} value={v.id}>
-                        {v.titulo}
+                        {etiquetaVacante(v)}
                       </option>
                     ))}
                   </select>
@@ -223,7 +224,7 @@ export function SeccionPostulaciones({
           <option value="">Elegir vacante...</option>
           {vacantes.map((v) => (
             <option key={v.id} value={v.id}>
-              {v.titulo}
+              {etiquetaVacante(v)}
             </option>
           ))}
         </select>

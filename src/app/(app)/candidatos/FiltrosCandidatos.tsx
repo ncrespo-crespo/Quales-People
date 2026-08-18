@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Equipo, Vacante } from "@/lib/types";
 import { ORIGENES_CANDIDATO } from "@/lib/types";
+import { etiquetaVacante } from "@/lib/vacantes";
 
 export function FiltrosCandidatos({
   basePath,
@@ -42,7 +43,7 @@ export function FiltrosCandidatos({
         <option value="">Todas las vacantes</option>
         {vacantes.map((v) => (
           <option key={v.id} value={v.id}>
-            {v.titulo}
+            {etiquetaVacante(v)}
           </option>
         ))}
       </select>

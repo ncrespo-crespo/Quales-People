@@ -28,6 +28,19 @@ function mensajeDeError(e: unknown): string {
   return "error desconocido";
 }
 
+async function esAdmin() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: perfil } = await supabase
+    .from("equipo")
+    .select("rol")
+    .eq("id", user!.id)
+    .single();
+  return perfil?.rol === "admin";
+}
+
 async function subirCvSiCorresponde(
   supabase: Awaited<ReturnType<typeof createClient>>,
   candidatoId: string,
@@ -63,6 +76,25 @@ export async function crearCandidato(formData: FormData) {
       telefono: valorONulo(formData, "telefono"),
       linkedin_url: valorONulo(formData, "linkedin_url"),
       origen: valorONulo(formData, "origen"),
+      // perfil
+      apellido: valorONulo(formData, "apellido"),
+      pais: valorONulo(formData, "pais"),
+      provincia_estado: valorONulo(formData, "provincia_estado"),
+      localidad: valorONulo(formData, "localidad"),
+      genero: valorONulo(formData, "genero"),
+      fecha_nacimiento: valorONulo(formData, "fecha_nacimiento"),
+      area: valorONulo(formData, "area"),
+      formacion_tecnica: valorONulo(formData, "formacion_tecnica"),
+      anios_experiencia: valorNumero(formData, "anios_experiencia"),
+      experiencia_consultoria: valorBooleano(formData, "experiencia_consultoria"),
+      nivel_ingles: valorONulo(formData, "nivel_ingles"),
+      stack_principal: valorONulo(formData, "stack_principal"),
+      lugar_empleo_actual: valorONulo(formData, "lugar_empleo_actual"),
+      expectativa_salarial: valorONulo(formData, "expectativa_salarial"),
+      rate_fl: valorONulo(formData, "rate_fl"),
+      tipo_moneda: valorONulo(formData, "tipo_moneda"),
+      tipo_candidato: valorONulo(formData, "tipo_candidato"),
+      disponibilidad_ingreso: valorONulo(formData, "disponibilidad_ingreso"),
     })
     .select("id")
     .single();
@@ -81,7 +113,7 @@ export async function crearCandidato(formData: FormData) {
   }
 
   if (vacanteInicial) {
-    const { data: postulacion } = await supabase
+    const { data: postulacion, error: errorPostulacion } = await supabase
       .from("postulaciones")
       .insert({
         candidato_id: candidato.id,
@@ -92,14 +124,23 @@ export async function crearCandidato(formData: FormData) {
       .select("id")
       .single();
 
-    if (postulacion) {
-      await supabase.from("historial_etapas").insert({
-        postulacion_id: postulacion.id,
-        etapa_anterior: null,
-        etapa_nueva: "Sourcing",
-        movido_por_id: user!.id,
-      });
+    if (errorPostulacion || !postulacion) {
+      // El candidato ya se guardó: no lo perdemos, pero avisamos que la
+      // vacante no quedó vinculada para que no parezca que se guardó todo
+      // bien (antes esto fallaba en silencio).
+      redirect(
+        `/candidatos/${candidato.id}?error=${encodeURIComponent(
+          `el candidato se guardó, pero no se pudo vincular la vacante: ${errorPostulacion?.message ?? "error desconocido"}`,
+        )}`,
+      );
     }
+
+    await supabase.from("historial_etapas").insert({
+      postulacion_id: postulacion.id,
+      etapa_anterior: null,
+      etapa_nueva: "Sourcing",
+      movido_por_id: user!.id,
+    });
   }
 
   revalidatePath("/candidatos");
@@ -155,6 +196,26 @@ export async function actualizarCandidato(id: string, formData: FormData) {
 
   revalidatePath("/candidatos");
   redirect(`/candidatos/${id}`);
+}
+
+// Borrado real (no solo ocultar): pensado para limpiar duplicados. Solo
+// admin porque se lleva puestas todas sus postulaciones, notas e historial
+// (on delete cascade).
+export async function eliminarCandidato(id: string) {
+  if (!(await esAdmin())) {
+    return { error: "solo un admin puede eliminar candidatos" };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("candidatos").delete().eq("id", id);
+
+  if (error) {
+    return { error: mensajeDeError(error) };
+  }
+
+  revalidatePath("/candidatos");
+  revalidatePath("/candidatos/kanban");
+  redirect("/candidatos");
 }
 
 export async function alternarOcultoCandidato(id: string, oculto: boolean) {
