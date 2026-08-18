@@ -77,6 +77,7 @@ export const ETAPAS_CANDIDATO = [
 // — ver `Postulacion` más abajo.
 export type Candidato = {
   id: string;
+  nombre: string | null;
   nombre_completo: string;
   email: string | null;
   telefono: string | null;
@@ -90,6 +91,9 @@ export type Candidato = {
 // Campos de perfil agregados en la migración 0004 a partir de la planilla
 // "Candidatosas" (ver PRD). Todos opcionales: solo están completos en los
 // candidatos importados, no en los que se cargan desde el formulario.
+// Nota: tipo_candidato, disponibilidad_ingreso, expectativa_salarial y
+// tipo_moneda se mudaron a `Postulacion` en la migración 0011 — son del
+// proceso de selección, no de la persona.
 export type CandidatoPerfil = {
   apellido: string | null;
   pais: string | null;
@@ -104,11 +108,7 @@ export type CandidatoPerfil = {
   nivel_ingles: string | null;
   stack_principal: string | null;
   lugar_empleo_actual: string | null;
-  expectativa_salarial: string | null;
   rate_fl: string | null;
-  tipo_moneda: string | null;
-  tipo_candidato: string | null;
-  disponibilidad_ingreso: string | null;
   fuente_importada: string | null;
 };
 
@@ -128,15 +128,19 @@ export type Postulacion = {
   descartado_motivo: string | null;
   fecha_postulacion: string;
   // proceso de selección
+  tipo_candidato: string | null;
+  disponibilidad_ingreso: string | null;
+  expectativa_salarial: string | null;
+  tipo_moneda: string | null;
   fecha_primer_contacto: string | null;
   fecha_screening_hr: string | null;
+  fecha_entrevista_hr: string | null;
   seniority_propuesto_hr: string | null;
   feedback_entrevista_hr: string | null;
   fecha_entrevista_area: string | null;
   seniority_propuesto_area: string | null;
-  feedback_entrevista: string | null;
   feedback_entrevista_area: string | null;
-  estado_final_importado: string | null;
+  estado_final: string | null;
   // oferta laboral
   avanza_ol: boolean | null;
   fecha_envio_ol: string | null;
@@ -149,12 +153,12 @@ export type Postulacion = {
   // onboarding
   ob_cliente: string | null;
   ob_proyecto: string | null;
-  ob_induccion_empresa: string | null;
-  ob_induccion_empresa_horario: string | null;
+  ob_induccion_empresa_responsable: string | null;
+  ob_induccion_empresa_fecha_hora: string | null;
   ob_induccion_area_responsable: string | null;
-  ob_induccion_area_horario: string | null;
+  ob_induccion_area_fecha_hora: string | null;
   ob_induccion_proyecto_responsable: string | null;
-  ob_induccion_proyecto_horario: string | null;
+  ob_induccion_proyecto_fecha_hora: string | null;
   ob_fecha_envio_elementos: string | null;
   ob_fecha_recepcion_elementos: string | null;
 };

@@ -21,6 +21,12 @@ function valorBooleano(formData: FormData, campo: string) {
   return null;
 }
 
+function nombreCompleto(formData: FormData): string {
+  const nombre = valorONulo(formData, "nombre") ?? "";
+  const apellido = valorONulo(formData, "apellido") ?? "";
+  return `${nombre} ${apellido}`.trim();
+}
+
 function mensajeDeError(e: unknown): string {
   if (e && typeof e === "object" && "message" in e && typeof e.message === "string") {
     return e.message;
@@ -71,13 +77,14 @@ export async function crearCandidato(formData: FormData) {
   const { data: candidato, error } = await supabase
     .from("candidatos")
     .insert({
-      nombre_completo: String(formData.get("nombre_completo")),
+      nombre: valorONulo(formData, "nombre"),
+      apellido: valorONulo(formData, "apellido"),
+      nombre_completo: nombreCompleto(formData),
       email: valorONulo(formData, "email"),
       telefono: valorONulo(formData, "telefono"),
       linkedin_url: valorONulo(formData, "linkedin_url"),
       origen: valorONulo(formData, "origen"),
       // perfil
-      apellido: valorONulo(formData, "apellido"),
       pais: valorONulo(formData, "pais"),
       provincia_estado: valorONulo(formData, "provincia_estado"),
       localidad: valorONulo(formData, "localidad"),
@@ -90,11 +97,7 @@ export async function crearCandidato(formData: FormData) {
       nivel_ingles: valorONulo(formData, "nivel_ingles"),
       stack_principal: valorONulo(formData, "stack_principal"),
       lugar_empleo_actual: valorONulo(formData, "lugar_empleo_actual"),
-      expectativa_salarial: valorONulo(formData, "expectativa_salarial"),
       rate_fl: valorONulo(formData, "rate_fl"),
-      tipo_moneda: valorONulo(formData, "tipo_moneda"),
-      tipo_candidato: valorONulo(formData, "tipo_candidato"),
-      disponibilidad_ingreso: valorONulo(formData, "disponibilidad_ingreso"),
     })
     .select("id")
     .single();
@@ -158,7 +161,9 @@ export async function actualizarCandidato(id: string, formData: FormData) {
     const { error } = await supabase
       .from("candidatos")
       .update({
-        nombre_completo: String(formData.get("nombre_completo")),
+        nombre: valorONulo(formData, "nombre"),
+        apellido: valorONulo(formData, "apellido"),
+        nombre_completo: nombreCompleto(formData),
         email: valorONulo(formData, "email"),
         telefono: valorONulo(formData, "telefono"),
         linkedin_url: valorONulo(formData, "linkedin_url"),
@@ -167,7 +172,6 @@ export async function actualizarCandidato(id: string, formData: FormData) {
         oculto: formData.get("oculto") === "on",
         ...(rutaCv ? { cv_url: rutaCv } : {}),
         // perfil
-        apellido: valorONulo(formData, "apellido"),
         pais: valorONulo(formData, "pais"),
         provincia_estado: valorONulo(formData, "provincia_estado"),
         localidad: valorONulo(formData, "localidad"),
@@ -180,11 +184,7 @@ export async function actualizarCandidato(id: string, formData: FormData) {
         nivel_ingles: valorONulo(formData, "nivel_ingles"),
         stack_principal: valorONulo(formData, "stack_principal"),
         lugar_empleo_actual: valorONulo(formData, "lugar_empleo_actual"),
-        expectativa_salarial: valorONulo(formData, "expectativa_salarial"),
         rate_fl: valorONulo(formData, "rate_fl"),
-        tipo_moneda: valorONulo(formData, "tipo_moneda"),
-        tipo_candidato: valorONulo(formData, "tipo_candidato"),
-        disponibilidad_ingreso: valorONulo(formData, "disponibilidad_ingreso"),
         fuente_importada: valorONulo(formData, "fuente_importada"),
       })
       .eq("id", id);

@@ -12,21 +12,29 @@ function formatearFecha(fecha: string | null) {
   return new Date(fecha).toLocaleDateString("es-AR");
 }
 
-type CampoSpec = { name: keyof Postulacion; label: string; tipo?: "fecha" | "textarea" | "booleano" };
+type CampoSpec = {
+  name: keyof Postulacion;
+  label: string;
+  tipo?: "fecha" | "fecha_hora" | "textarea" | "booleano";
+};
 
 const GRUPOS: { titulo: string; campos: CampoSpec[] }[] = [
   {
     titulo: "Proceso de selección",
     campos: [
+      { name: "tipo_candidato", label: "Tipo de candidato" },
       { name: "fecha_primer_contacto", label: "Fecha primer contacto", tipo: "fecha" },
       { name: "fecha_screening_hr", label: "Fecha screening HR", tipo: "fecha" },
+      { name: "fecha_entrevista_hr", label: "Fecha entrevista HR", tipo: "fecha" },
       { name: "seniority_propuesto_hr", label: "Seniority propuesto (HR)" },
       { name: "feedback_entrevista_hr", label: "Feedback entrevista HR", tipo: "textarea" },
       { name: "fecha_entrevista_area", label: "Fecha entrevista área", tipo: "fecha" },
       { name: "seniority_propuesto_area", label: "Seniority propuesto (área)" },
-      { name: "feedback_entrevista", label: "Feedback entrevista", tipo: "textarea" },
       { name: "feedback_entrevista_area", label: "Feedback entrevista área", tipo: "textarea" },
-      { name: "estado_final_importado", label: "Estado final (importado)" },
+      { name: "disponibilidad_ingreso", label: "Disponibilidad de ingreso" },
+      { name: "expectativa_salarial", label: "Expectativa salarial" },
+      { name: "tipo_moneda", label: "Moneda" },
+      { name: "estado_final", label: "Status final" },
     ],
   },
   {
@@ -47,12 +55,12 @@ const GRUPOS: { titulo: string; campos: CampoSpec[] }[] = [
     campos: [
       { name: "ob_cliente", label: "Cliente" },
       { name: "ob_proyecto", label: "Proyecto" },
-      { name: "ob_induccion_empresa", label: "Inducción empresa" },
-      { name: "ob_induccion_empresa_horario", label: "Inducción empresa · horario" },
+      { name: "ob_induccion_empresa_fecha_hora", label: "Fecha y hora onboarding empresa", tipo: "fecha_hora" },
+      { name: "ob_induccion_empresa_responsable", label: "Inducción a empresa · responsable" },
+      { name: "ob_induccion_area_fecha_hora", label: "Fecha y hora inducción al área", tipo: "fecha_hora" },
       { name: "ob_induccion_area_responsable", label: "Inducción al área · responsable" },
-      { name: "ob_induccion_area_horario", label: "Inducción al área · horario" },
+      { name: "ob_induccion_proyecto_fecha_hora", label: "Fecha y hora inducción a proyecto", tipo: "fecha_hora" },
       { name: "ob_induccion_proyecto_responsable", label: "Inducción a proyecto · responsable" },
-      { name: "ob_induccion_proyecto_horario", label: "Inducción a proyecto · horario" },
       { name: "ob_fecha_envio_elementos", label: "Envío de elementos de trabajo", tipo: "fecha" },
       { name: "ob_fecha_recepcion_elementos", label: "Recepción de elementos de trabajo", tipo: "fecha" },
     ],
@@ -267,6 +275,20 @@ function CampoPostulacion({ campo, valor }: { campo: CampoSpec; valor: unknown }
           type="date"
           name={nombre}
           defaultValue={valor ? String(valor).slice(0, 10) : ""}
+          className="campo"
+        />
+      </label>
+    );
+  }
+
+  if (campo.tipo === "fecha_hora") {
+    return (
+      <label className="flex flex-col gap-1 text-xs text-zinc-700 dark:text-zinc-300">
+        {campo.label}
+        <input
+          type="datetime-local"
+          name={nombre}
+          defaultValue={valor ? String(valor).slice(0, 16) : ""}
           className="campo"
         />
       </label>

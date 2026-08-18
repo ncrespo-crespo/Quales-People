@@ -3,6 +3,20 @@ import type { CandidatoCompleto, Equipo, Vacante } from "@/lib/types";
 import { ORIGENES_CANDIDATO } from "@/lib/types";
 import { etiquetaVacante } from "@/lib/vacantes";
 
+// Los candidatos importados solo tenían "nombre_completo" + "apellido"
+// (sin nombre de pila suelto). Para no dejar el campo "Nombres" vacío en
+// esos casos, se infiere restando el apellido del nombre completo.
+function inferirNombre(candidato?: CandidatoCompleto) {
+  if (!candidato) return "";
+  if (candidato.nombre) return candidato.nombre;
+  const completo = candidato.nombre_completo?.trim() ?? "";
+  const apellido = candidato.apellido?.trim();
+  if (apellido && completo.toLowerCase().endsWith(apellido.toLowerCase())) {
+    return completo.slice(0, completo.length - apellido.length).trim();
+  }
+  return completo;
+}
+
 export function FormularioCandidato({
   action,
   vacantes,
@@ -34,14 +48,24 @@ export function FormularioCandidato({
         </p>
       )}
 
-      <Campo label="Nombre completo">
-        <input
-          name="nombre_completo"
-          required
-          defaultValue={candidato?.nombre_completo}
-          className="campo"
-        />
-      </Campo>
+      <div className="flex gap-2">
+        <Campo label="Nombres">
+          <input
+            name="nombre"
+            required
+            defaultValue={inferirNombre(candidato)}
+            className="campo"
+          />
+        </Campo>
+        <Campo label="Apellidos">
+          <input
+            name="apellido"
+            required
+            defaultValue={candidato?.apellido ?? ""}
+            className="campo"
+          />
+        </Campo>
+      </div>
 
       <Campo label="Email">
         <input type="email" name="email" defaultValue={candidato?.email ?? ""} className="campo" />
@@ -163,7 +187,6 @@ type CampoSpec = {
 };
 
 const CAMPOS_PERFIL: CampoSpec[] = [
-  { name: "apellido", label: "Apellido" },
   { name: "pais", label: "País" },
   { name: "provincia_estado", label: "Provincia / estado" },
   { name: "localidad", label: "Localidad" },
@@ -176,11 +199,7 @@ const CAMPOS_PERFIL: CampoSpec[] = [
   { name: "nivel_ingles", label: "Nivel de inglés" },
   { name: "stack_principal", label: "Stack principal" },
   { name: "lugar_empleo_actual", label: "Lugar de empleo actual" },
-  { name: "expectativa_salarial", label: "Expectativa salarial" },
   { name: "rate_fl", label: "Rate freelance" },
-  { name: "tipo_moneda", label: "Tipo de moneda" },
-  { name: "tipo_candidato", label: "Tipo de candidato" },
-  { name: "disponibilidad_ingreso", label: "Disponibilidad de ingreso" },
   { name: "fuente_importada", label: "Fuente" },
 ];
 

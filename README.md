@@ -90,6 +90,16 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
   los mismos filtros de provincia/estado, nivel de inglés y stack. En
   ambas pantallas todos los filtros (incluido el de año) quedan en una
   sola fila.
+- Redefinición de campos persona vs. proceso (migración 0011, ver "Base
+  de datos" más abajo): el candidato suma "Nombres" separado de
+  "Apellidos"; tipo de candidato, disponibilidad de ingreso, expectativa
+  salarial y moneda pasan a ser del proceso de selección (antes eran de
+  la persona); se agrega la fecha de entrevista de HR (distinta de la de
+  screening); onboarding pasa a tener fecha y hora + responsable por
+  cada instancia (empresa/área/proyecto). Los `<select>` de vacante (al
+  crear un candidato, en postulaciones y en los filtros) ahora muestran
+  cliente y fecha de inicio además del título, para distinguir búsquedas
+  con el mismo nombre.
 
 El resto de las funcionalidades (Gmail) se
 construyen en las fases siguientes (ver el PRD, sección 6 — Roadmap de
@@ -139,6 +149,32 @@ Después correr también, en orden:
   inglés y stack principal del candidato, para poder filtrar el
   tablero de postulaciones igual que ya se filtra el listado de
   candidatos.
+- `0011_redefinicion_perfil_y_proceso.sql` — redefine, según la lista
+  definitiva de campos, qué es de la persona y qué es del proceso:
+  - `candidatos` suma `nombre` (nombre de pila, separado de `apellido`).
+    `nombre_completo` se sigue usando en toda la app para
+    mostrar/ordenar/buscar; se recalcula solo (`nombre` + `apellido`)
+    cada vez que se guarda el candidato.
+  - `tipo_candidato`, `disponibilidad_ingreso`, `expectativa_salarial` y
+    `tipo_moneda` se mudan de `candidatos` a `postulaciones` (dependen de
+    a qué búsqueda/cliente se postula, no son fijos de la persona). Los
+    datos ya cargados se migran solos.
+  - `postulaciones` suma `fecha_entrevista_hr` (screening y entrevista de
+    HR son dos pasos distintos, antes solo existía la fecha de
+    screening).
+  - `feedback_entrevista` y `feedback_entrevista_area` estaban
+    duplicados desde la planilla original: se unifican en
+    `feedback_entrevista_area`.
+  - `estado_final_importado` pasa a llamarse `estado_final`: ya no es
+    solo un dato arrastrado de la importación, es un campo normal del
+    proceso.
+  - Onboarding: cada instancia (empresa/área/proyecto) pasa a tener
+    "fecha y hora" (`ob_induccion_*_fecha_hora`, timestamp) +
+    "responsable" (`ob_induccion_*_responsable`, texto). Antes "empresa"
+    no tenía responsable y los "horario" eran texto libre sin fecha —
+    esas columnas viejas quedan sin usarse desde la app (no se pueden
+    convertir solas a fecha sin arriesgar datos): se pueden borrar más
+    adelante a mano si están vacías.
 
 ### Carga inicial desde la planilla de reclutamiento
 

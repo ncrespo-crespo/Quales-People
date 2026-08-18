@@ -162,8 +162,6 @@ export default async function FichaCandidatoPage({
           />
           <Dato label="Nivel de inglés" valor={candidato.nivel_ingles} />
           <Dato label="Stack principal" valor={candidato.stack_principal} />
-          <Dato label="Tipo de candidato" valor={candidato.tipo_candidato} />
-          <Dato label="Disponibilidad de ingreso" valor={candidato.disponibilidad_ingreso} />
           <Dato
             label="CV"
             valor={
@@ -296,9 +294,7 @@ function PerfilOtrosDatos({ candidato }: { candidato: CandidatoCompleto }) {
     ["Género", candidato.genero],
     ["Formación técnica", candidato.formacion_tecnica],
     ["Lugar de empleo actual", candidato.lugar_empleo_actual],
-    ["Expectativa salarial", candidato.expectativa_salarial],
     ["Rate freelance", candidato.rate_fl],
-    ["Tipo de moneda", candidato.tipo_moneda],
     ["Fuente (importada)", candidato.fuente_importada],
   ];
 
