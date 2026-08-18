@@ -294,6 +294,12 @@ function PerfilOtrosDatos({ candidato }: { candidato: CandidatoCompleto }) {
     ["Género", candidato.genero],
     ["Formación técnica", candidato.formacion_tecnica],
     ["Lugar de empleo actual", candidato.lugar_empleo_actual],
+    [
+      "Remuneración pretendida",
+      candidato.remuneracion_pretendida !== null
+        ? `${candidato.moneda_remuneracion_pretendida ?? ""} ${candidato.remuneracion_pretendida}`.trim()
+        : null,
+    ],
     ["Rate freelance", candidato.rate_fl],
     ["Fuente (importada)", candidato.fuente_importada],
   ];

@@ -1,5 +1,5 @@
 import type { Equipo, EstadoVacante, Vacante } from "@/lib/types";
-import { MODALIDADES_TRABAJO, PRIORIDADES_VACANTE } from "@/lib/types";
+import { MODALIDADES_TRABAJO, MONEDAS, PRIORIDADES_VACANTE } from "@/lib/types";
 
 export function FormularioVacante({
   action,
@@ -169,14 +169,31 @@ export function FormularioVacante({
         </select>
       </Campo>
 
-      <Campo label="Banda salarial">
-        <input
-          name="banda_salarial"
-          placeholder="Ej: USD 2000-3000"
-          defaultValue={vacante?.banda_salarial ?? ""}
-          className="campo"
-        />
-      </Campo>
+      <div className="flex gap-2">
+        <Campo label="Banda salarial">
+          <input
+            type="number"
+            step="any"
+            name="banda_salarial"
+            defaultValue={vacante?.banda_salarial ?? ""}
+            className="campo"
+          />
+        </Campo>
+        <Campo label="Moneda">
+          <select
+            name="moneda_banda_salarial"
+            defaultValue={vacante?.moneda_banda_salarial ?? ""}
+            className="campo"
+          >
+            <option value="">—</option>
+            {MONEDAS.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+        </Campo>
+      </div>
 
       <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
         <input

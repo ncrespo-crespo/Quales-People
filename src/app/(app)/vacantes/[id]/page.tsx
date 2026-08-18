@@ -107,7 +107,14 @@ export default async function FichaVacantePage({
             valor={[vacante.localidad, vacante.provincia_estado, vacante.pais].filter(Boolean).join(", ") || null}
           />
           <Dato label="Modalidad de trabajo" valor={vacante.modalidad_trabajo} />
-          <Dato label="Banda salarial" valor={vacante.banda_salarial} />
+          <Dato
+            label="Banda salarial"
+            valor={
+              vacante.banda_salarial !== null
+                ? `${vacante.moneda_banda_salarial ?? ""} ${vacante.banda_salarial}`.trim()
+                : null
+            }
+          />
           <Dato label="Acepta freelance" valor={vacante.acepta_freelance ? "Sí" : "No"} />
           <Dato
             label="Placa"

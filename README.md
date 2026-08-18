@@ -123,6 +123,9 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
   tablero de postulaciones, Overview) pasan a ser de selección múltiple
   — se puede filtrar por varios estados, reclutadores, orígenes, etc. a
   la vez (`src/components/FiltroMultiple.tsx`).
+- Banda salarial (vacante) y remuneración pretendida (candidato) pasan a
+  ser un monto con su moneda (`ARS`/`USD`/`EUR`, migración 0013) en vez
+  de texto libre, para poder comparar valores más adelante.
 
 El resto de las funcionalidades (Gmail) se
 construyen en las fases siguientes (ver el PRD, sección 6 — Roadmap de
@@ -204,6 +207,12 @@ Después correr también, en orden:
   `modalidad_trabajo` (`On Site` / `Híbrido` / `Remoto`, con check
   constraint), `banda_salarial` y `acepta_freelance`. `candidatos` suma
   `remuneracion_pretendida`.
+- `0013_moneda_remuneracion.sql` — `banda_salarial` (vacantes) y
+  `remuneracion_pretendida` (candidatos) pasan de texto libre a monto
+  numérico, cada uno con su moneda (`moneda_banda_salarial` /
+  `moneda_remuneracion_pretendida`, `ARS`/`USD`/`EUR` con check
+  constraint) — antes no se podían comparar valores ni sabías en qué
+  moneda estaba cada uno.
 
 ### Carga inicial desde la planilla de reclutamiento
 

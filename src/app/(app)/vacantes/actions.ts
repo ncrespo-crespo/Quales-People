@@ -13,6 +13,11 @@ function valorBooleano(formData: FormData, campo: string) {
   return formData.get(campo) === "on";
 }
 
+function valorNumero(formData: FormData, campo: string) {
+  const valor = valorONulo(formData, campo);
+  return valor === null ? null : Number(valor);
+}
+
 export async function crearVacante(formData: FormData) {
   const supabase = await createClient();
 
@@ -32,7 +37,8 @@ export async function crearVacante(formData: FormData) {
     provincia_estado: valorONulo(formData, "provincia_estado"),
     localidad: valorONulo(formData, "localidad"),
     modalidad_trabajo: valorONulo(formData, "modalidad_trabajo"),
-    banda_salarial: valorONulo(formData, "banda_salarial"),
+    banda_salarial: valorNumero(formData, "banda_salarial"),
+    moneda_banda_salarial: valorONulo(formData, "moneda_banda_salarial"),
     acepta_freelance: valorBooleano(formData, "acepta_freelance"),
   });
 
@@ -67,7 +73,8 @@ export async function actualizarVacante(id: string, formData: FormData) {
       provincia_estado: valorONulo(formData, "provincia_estado"),
       localidad: valorONulo(formData, "localidad"),
       modalidad_trabajo: valorONulo(formData, "modalidad_trabajo"),
-      banda_salarial: valorONulo(formData, "banda_salarial"),
+      banda_salarial: valorNumero(formData, "banda_salarial"),
+      moneda_banda_salarial: valorONulo(formData, "moneda_banda_salarial"),
       acepta_freelance: valorBooleano(formData, "acepta_freelance"),
     })
     .eq("id", id);

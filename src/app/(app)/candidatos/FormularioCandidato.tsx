@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { CandidatoCompleto, Equipo, Vacante } from "@/lib/types";
-import { ORIGENES_CANDIDATO } from "@/lib/types";
+import { MONEDAS, ORIGENES_CANDIDATO } from "@/lib/types";
 import { etiquetaVacante } from "@/lib/vacantes";
 import { BotonGuardar } from "./BotonGuardar";
 
@@ -195,7 +195,6 @@ const CAMPOS_PERFIL: CampoSpec[] = [
   { name: "nivel_ingles", label: "Nivel de inglés" },
   { name: "stack_principal", label: "Stack principal" },
   { name: "lugar_empleo_actual", label: "Lugar de empleo actual" },
-  { name: "remuneracion_pretendida", label: "Remuneración pretendida" },
   { name: "rate_fl", label: "Rate freelance" },
   { name: "fuente_importada", label: "Fuente" },
 ];
@@ -210,6 +209,32 @@ function SeccionPerfil({ candidato }: { candidato?: CandidatoCompleto }) {
         {CAMPOS_PERFIL.map((campo) => (
           <CampoDinamico key={campo.name} campo={campo} valor={candidato?.[campo.name]} />
         ))}
+
+        <div className="flex gap-2">
+          <Campo label="Remuneración pretendida">
+            <input
+              type="number"
+              step="any"
+              name="remuneracion_pretendida"
+              defaultValue={candidato?.remuneracion_pretendida ?? ""}
+              className="campo"
+            />
+          </Campo>
+          <Campo label="Moneda">
+            <select
+              name="moneda_remuneracion_pretendida"
+              defaultValue={candidato?.moneda_remuneracion_pretendida ?? ""}
+              className="campo"
+            >
+              <option value="">—</option>
+              {MONEDAS.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </select>
+          </Campo>
+        </div>
       </div>
     </details>
   );

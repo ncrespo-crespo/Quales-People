@@ -31,6 +31,9 @@ export const ANIOS_DISPONIBLES = [2024, 2025, 2026, 2027] as const;
 export const MODALIDADES_TRABAJO = ["On Site", "Híbrido", "Remoto"] as const;
 export type ModalidadTrabajo = (typeof MODALIDADES_TRABAJO)[number];
 
+export const MONEDAS = ["ARS", "USD", "EUR"] as const;
+export type Moneda = (typeof MONEDAS)[number];
+
 export type Vacante = {
   id: string;
   titulo: string;
@@ -51,7 +54,8 @@ export type Vacante = {
   provincia_estado: string | null;
   localidad: string | null;
   modalidad_trabajo: ModalidadTrabajo | null;
-  banda_salarial: string | null;
+  banda_salarial: number | null;
+  moneda_banda_salarial: Moneda | null;
   acepta_freelance: boolean;
 };
 
@@ -121,7 +125,8 @@ export type CandidatoPerfil = {
   stack_principal: string | null;
   lugar_empleo_actual: string | null;
   rate_fl: string | null;
-  remuneracion_pretendida: string | null;
+  remuneracion_pretendida: number | null;
+  moneda_remuneracion_pretendida: Moneda | null;
   fuente_importada: string | null;
 };
 
