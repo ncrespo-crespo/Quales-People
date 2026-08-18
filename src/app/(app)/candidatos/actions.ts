@@ -21,6 +21,13 @@ function valorBooleano(formData: FormData, campo: string) {
   return null;
 }
 
+function mensajeDeError(e: unknown): string {
+  if (e && typeof e === "object" && "message" in e && typeof e.message === "string") {
+    return e.message;
+  }
+  return "error desconocido";
+}
+
 async function subirCvSiCorresponde(
   supabase: Awaited<ReturnType<typeof createClient>>,
   candidatoId: string,
@@ -174,7 +181,7 @@ export async function actualizarCandidato(id: string, formData: FormData) {
 
     if (error) throw error;
   } catch (e) {
-    const mensaje = e instanceof Error ? e.message : "error desconocido";
+    const mensaje = mensajeDeError(e);
     redirect(`/candidatos/${id}/editar?error=${encodeURIComponent(mensaje)}`);
   }
 
