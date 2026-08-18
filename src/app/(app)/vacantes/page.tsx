@@ -21,12 +21,17 @@ export default async function VacantesPage() {
     <div className="mx-auto max-w-5xl p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-bold text-brand-navy dark:text-white">Vacantes</h1>
-        <Link
-          href="/vacantes/nueva"
-          className="rounded bg-brand-navy px-4 py-2 text-sm font-medium text-white hover:brightness-110"
-        >
-          + Nueva vacante
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/vacantes/kanban" className="text-sm text-brand-blue hover:underline">
+            Ver como tablero
+          </Link>
+          <Link
+            href="/vacantes/nueva"
+            className="rounded bg-brand-navy px-4 py-2 text-sm font-medium text-white hover:brightness-110"
+          >
+            + Nueva vacante
+          </Link>
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded border border-black/10 dark:border-white/10">

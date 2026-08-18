@@ -22,12 +22,17 @@ export default async function CandidatosPage() {
     <div className="mx-auto max-w-5xl p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-bold text-brand-navy dark:text-white">Candidatos</h1>
-        <Link
-          href="/candidatos/nuevo"
-          className="rounded bg-brand-navy px-4 py-2 text-sm font-medium text-white hover:brightness-110"
-        >
-          + Nuevo candidato
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/candidatos/kanban" className="text-sm text-brand-blue hover:underline">
+            Ver como tablero
+          </Link>
+          <Link
+            href="/candidatos/nuevo"
+            className="rounded bg-brand-navy px-4 py-2 text-sm font-medium text-white hover:brightness-110"
+          >
+            + Nuevo candidato
+          </Link>
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded border border-black/10 dark:border-white/10">

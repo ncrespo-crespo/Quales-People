@@ -74,3 +74,8 @@ export type Candidato = {
   fecha_ingreso: string;
   descartado_motivo: string | null;
 };
+
+export type CandidatoConDias = Candidato & {
+  fecha_desde_etapa_actual: string | null;
+  dias_en_etapa: number | null;
+};

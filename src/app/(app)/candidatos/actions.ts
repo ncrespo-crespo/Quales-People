@@ -126,3 +126,46 @@ export async function actualizarCandidato(id: string, formData: FormData) {
   revalidatePath("/candidatos");
   redirect("/candidatos");
 }
+
+export async function moverCandidato(
+  id: string,
+  etapaAnterior: string,
+  etapaNueva: string,
+  nota: string | null,
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (etapaNueva === "Descartado" && !nota) {
+    return { error: "para descartar un candidato hay que indicar el motivo" };
+  }
+  if (etapaAnterior === etapaNueva) {
+    return { error: null };
+  }
+
+  const { error } = await supabase
+    .from("candidatos")
+    .update({
+      etapa_actual: etapaNueva,
+      descartado_motivo: etapaNueva === "Descartado" ? nota : null,
+    })
+    .eq("id", id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  await supabase.from("historial_etapas").insert({
+    candidato_id: id,
+    etapa_anterior: etapaAnterior,
+    etapa_nueva: etapaNueva,
+    movido_por_id: user!.id,
+    nota,
+  });
+
+  revalidatePath("/candidatos");
+  revalidatePath("/candidatos/kanban");
+  return { error: null };
+}

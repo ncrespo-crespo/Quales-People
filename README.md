@@ -14,18 +14,25 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
 - **Vercel** — hosting del frontend.
 - **Tailwind CSS** — estilos.
 
-## Estado actual: Fase 2 — CRUD de vacantes y candidatos
+## Estado actual: Fase 3 — Tableros Kanban
 
 - Fase 0: scaffold de Next.js, cliente de Supabase, deploy en Vercel.
 - Fase 1: tablas de la base de datos (sección 4 del PRD), login con
   email/contraseña y alta automática de usuarios en `equipo`.
 - Fase 2: alta/edición de vacantes y candidatos, carga de CV a Storage,
   listados en tabla, y la pantalla de configuración de estados de vacante
-  (`/configuracion/estados`, solo admin).
+  (`/configuracion/estados`, solo admin). Además se amplió el esquema con
+  los datos reales de la planilla de reclutamiento (ver más abajo).
+- Fase 3: `/vacantes/kanban` (arrastrar una vacante entre columnas de
+  estado) y `/candidatos/kanban` (arrastrar un candidato entre etapas, con
+  selector de vacante/reclutador/origen). Cada movimiento dispara
+  automáticamente el registro correspondiente — `historial_etapas` para
+  candidatos (pide motivo si el destino es "Descartado"), o
+  `fecha_cierre_proceso` para vacantes que llegan a un estado terminal.
 
-El resto de las funcionalidades (Kanban, ficha de candidato, dashboard,
-Gmail) se construyen en las fases siguientes (ver el PRD, sección 6 —
-Roadmap de construcción).
+El resto de las funcionalidades (ficha de candidato, dashboard, Gmail) se
+construyen en las fases siguientes (ver el PRD, sección 6 — Roadmap de
+construcción).
 
 ## Requisitos previos
 
@@ -47,9 +54,11 @@ Esto crea las tablas (`equipo`, `vacantes`, `estados_vacante`, `candidatos`,
 `historial_etapas`, `notas_entrevistas`, `comunicaciones`), la vista
 `vw_metricas_vacantes` y los 9 estados iniciales de vacante.
 
-Después correr también, en orden, `0002_storage_cvs.sql` (bucket privado
+Después correr también, en orden: `0002_storage_cvs.sql` (bucket privado
 `cvs`), `0003_ampliacion_vacantes.sql` y `0004_ampliacion_candidatos.sql`
-(campos que salen de la planilla real de reclutamiento — ver más abajo).
+(campos que salen de la planilla real de reclutamiento — ver más abajo), y
+`0005_vista_candidatos_pipeline.sql` (días en la etapa actual, para el
+tablero de candidatos).
 
 ### Carga inicial desde la planilla de reclutamiento
 

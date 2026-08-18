@@ -56,3 +56,20 @@ export async function actualizarVacante(id: string, formData: FormData) {
   revalidatePath("/vacantes");
   redirect("/vacantes");
 }
+
+export async function moverVacante(id: string, estadoId: string) {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("vacantes")
+    .update({ estado_id: estadoId })
+    .eq("id", id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/vacantes");
+  revalidatePath("/vacantes/kanban");
+  return { error: null };
+}
