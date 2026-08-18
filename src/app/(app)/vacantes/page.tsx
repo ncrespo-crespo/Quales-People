@@ -188,16 +188,10 @@ export default async function VacantesPage({
                     }}
                     className="inline"
                   >
-                    <button type="submit" className="mr-3 text-brand-blue hover:underline">
+                    <button type="submit" className="text-brand-blue hover:underline">
                       {vacante.oculto ? "Mostrar" : "Ocultar"}
                     </button>
                   </form>
-                  <Link
-                    href={`/vacantes/${vacante.id}/editar`}
-                    className="text-brand-blue hover:underline"
-                  >
-                    Editar
-                  </Link>
                 </td>
               </tr>
             ))}

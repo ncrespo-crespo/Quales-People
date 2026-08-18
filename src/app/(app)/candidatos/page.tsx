@@ -193,16 +193,10 @@ export default async function CandidatosPage({
                     }}
                     className="inline"
                   >
-                    <button type="submit" className="mr-3 text-brand-blue hover:underline">
+                    <button type="submit" className="text-brand-blue hover:underline">
                       {candidato.oculto ? "Mostrar" : "Ocultar"}
                     </button>
                   </form>
-                  <Link
-                    href={`/candidatos/${candidato.id}/editar`}
-                    className="text-brand-blue hover:underline"
-                  >
-                    Editar
-                  </Link>
                 </td>
               </tr>
             ))}
