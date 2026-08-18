@@ -42,6 +42,10 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
   los mismos filtros que el tablero (etapa, vacante, reclutador, origen),
   más columnas de días en etapa, fecha de contacto y link directo a
   LinkedIn.
+- `/configuracion/equipo` (solo admin): invitar gente nueva por email (le
+  llega un mail de Supabase para poner su contraseña) y editar
+  rol/estado activo de cada miembro, sin tocar la base a mano. Requiere
+  la variable de entorno `SUPABASE_SERVICE_ROLE_KEY` (ver más abajo).
 
 El resto de las funcionalidades (dashboard de métricas, Gmail) se
 construyen en las fases siguientes (ver el PRD, sección 6 — Roadmap de
@@ -95,11 +99,16 @@ cual).
 
 ### Alta de usuarios del equipo
 
-Por ahora se crean desde el dashboard de Supabase: **Authentication → Users
-→ Add user** (con email y contraseña). Al primer login, un trigger crea
-automáticamente su fila en `equipo` con rol `reclutador` (o `admin` si el
-email es `ncrespo@qualesgroup.com`). Para cambiar el rol de alguien más a
-`admin`, editar la fila correspondiente en la tabla `equipo`.
+Desde la app: **Configuración → Equipo** (solo admin) → invitar por email.
+Le llega un mail de Supabase para que defina su contraseña; al aceptar la
+invitación, un trigger crea su fila en `equipo` con el nombre y el rol
+elegidos en el formulario. Requiere tener cargada
+`SUPABASE_SERVICE_ROLE_KEY` (ver "Variables de entorno").
+
+También se puede seguir dando de alta manualmente desde el dashboard de
+Supabase (**Authentication → Users → Add user**): en ese caso el trigger
+usa `reclutador` por defecto (`admin` si el email es
+`ncrespo@qualesgroup.com`), editable después desde Configuración → Equipo.
 
 ## Desarrollo local
 
@@ -120,6 +129,11 @@ Ver `.env.example`. Se obtienen desde el dashboard de Supabase, en
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` — la clave `service_role` (secreta) de la
+  misma pantalla. Solo se usa del lado del servidor (invitar gente desde
+  Configuración → Equipo). **Nunca** con prefijo `NEXT_PUBLIC_`, nunca en
+  el repo: en Vercel se carga igual que las otras, en **Settings →
+  Environment Variables**.
 
 ## Scripts
 
