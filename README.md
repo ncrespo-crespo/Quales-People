@@ -14,11 +14,14 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
 - **Vercel** — hosting del frontend.
 - **Tailwind CSS** — estilos.
 
-## Estado actual: Fase 1 — Datos base y login
+## Estado actual: Fase 2 — CRUD de vacantes y candidatos
 
 - Fase 0: scaffold de Next.js, cliente de Supabase, deploy en Vercel.
 - Fase 1: tablas de la base de datos (sección 4 del PRD), login con
   email/contraseña y alta automática de usuarios en `equipo`.
+- Fase 2: alta/edición de vacantes y candidatos, carga de CV a Storage,
+  listados en tabla, y la pantalla de configuración de estados de vacante
+  (`/configuracion/estados`, solo admin).
 
 El resto de las funcionalidades (Kanban, ficha de candidato, dashboard,
 Gmail) se construyen en las fases siguientes (ver el PRD, sección 6 —
@@ -43,6 +46,10 @@ Las migraciones viven en `supabase/migrations/`. Para aplicar la primera
 Esto crea las tablas (`equipo`, `vacantes`, `estados_vacante`, `candidatos`,
 `historial_etapas`, `notas_entrevistas`, `comunicaciones`), la vista
 `vw_metricas_vacantes` y los 9 estados iniciales de vacante.
+
+Después correr también `supabase/migrations/0002_storage_cvs.sql` de la
+misma forma: crea el bucket privado `cvs` donde se guardan los CVs de los
+candidatos.
 
 ### Alta de usuarios del equipo
 
