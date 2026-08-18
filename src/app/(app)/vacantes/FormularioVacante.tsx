@@ -114,6 +114,16 @@ export function FormularioVacante({
         />
       </Campo>
 
+      <Campo label="Link de Drive (placa de la búsqueda)">
+        <input
+          type="url"
+          name="drive_url"
+          defaultValue={vacante?.drive_url ?? ""}
+          placeholder="https://drive.google.com/..."
+          className="campo"
+        />
+      </Campo>
+
       <button
         type="submit"
         className="mt-2 rounded bg-brand-navy px-4 py-2 text-sm font-medium text-white hover:brightness-110"

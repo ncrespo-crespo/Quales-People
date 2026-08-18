@@ -47,9 +47,29 @@ Esto crea las tablas (`equipo`, `vacantes`, `estados_vacante`, `candidatos`,
 `historial_etapas`, `notas_entrevistas`, `comunicaciones`), la vista
 `vw_metricas_vacantes` y los 9 estados iniciales de vacante.
 
-Después correr también `supabase/migrations/0002_storage_cvs.sql` de la
-misma forma: crea el bucket privado `cvs` donde se guardan los CVs de los
-candidatos.
+Después correr también, en orden, `0002_storage_cvs.sql` (bucket privado
+`cvs`), `0003_ampliacion_vacantes.sql` y `0004_ampliacion_candidatos.sql`
+(campos que salen de la planilla real de reclutamiento — ver más abajo).
+
+### Carga inicial desde la planilla de reclutamiento
+
+`supabase/seed/` tiene la carga de los datos reales (Pipeline_Data_v1.0.xlsx,
+agosto 2026), para correr **una sola vez** y **después** de las 4
+migraciones de arriba:
+
+1. `0001_vacantes_hiring_plan_2026.sql` — las 69 búsquedas de la hoja
+   "Hiring Plan Services 2026".
+2. `0002_candidatos_importados.sql` — 264 de las 392 filas de la hoja
+   "Candidatosas" (128 quedaron afuera: tenían el nombre roto por una
+   fórmula `#REF!` en la planilla original — el detalle está en el
+   encabezado del archivo).
+
+Ninguno de los dos vincula candidatos con vacantes todavía (`vacante_id`
+queda vacío): esa relación no existe en la planilla de origen y hay que
+definirla a mano más adelante. `supabase/seed/scripts/generar_seeds.py` es
+el script que generó estos dos archivos, guardado como referencia del
+mapeo planilla → columnas (no está pensado para correrse de nuevo tal
+cual).
 
 ### Alta de usuarios del equipo
 

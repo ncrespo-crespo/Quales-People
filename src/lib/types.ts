@@ -28,6 +28,7 @@ export type Vacante = {
   fecha_prevista_ingreso_hm: string | null;
   fecha_ingreso_confirmada: string | null;
   notas: string | null;
+  drive_url: string | null;
 };
 
 export type VacanteConMetricas = Vacante & {

@@ -70,7 +70,17 @@ export default async function VacantesPage() {
                       ? `${vacante.dias_open} días open`
                       : "—"}
                 </td>
-                <td className="px-4 py-2 text-right">
+                <td className="px-4 py-2 text-right whitespace-nowrap">
+                  {vacante.drive_url && (
+                    <a
+                      href={vacante.drive_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mr-3 text-brand-blue hover:underline"
+                    >
+                      Placa
+                    </a>
+                  )}
                   <Link
                     href={`/vacantes/${vacante.id}/editar`}
                     className="text-brand-blue hover:underline"
