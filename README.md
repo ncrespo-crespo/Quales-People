@@ -163,10 +163,27 @@ cual).
 ### Alta de usuarios del equipo
 
 Desde la app: **Configuración → Equipo** (solo admin) → invitar por email.
-Le llega un mail de Supabase para que defina su contraseña; al aceptar la
-invitación, un trigger crea su fila en `equipo` con el nombre y el rol
-elegidos en el formulario. Requiere tener cargada
+Al invitar, un trigger crea de inmediato su fila en `equipo` con el nombre
+y el rol elegidos en el formulario (todavía sin poder loguearse). Le llega
+un mail de Supabase con un link a `/invitacion`, donde define su
+contraseña y ya queda activa la cuenta. Requiere tener cargada
 `SUPABASE_SERVICE_ROLE_KEY` (ver "Variables de entorno").
+
+**Importante — configuración obligatoria en Supabase**: el link de
+invitación solo funciona si `/invitacion` está en la lista de redirects
+permitidos. En el dashboard de Supabase → **Authentication → URL
+Configuration → Redirect URLs**, agregar:
+
+- `https://<tu-dominio-de-producción>/invitacion`
+- `http://localhost:3000/invitacion` (para probar en desarrollo local)
+
+Si esa URL no está en la lista, Supabase ignora el `redirectTo` y manda al
+Site URL por defecto, donde la app no tiene forma de recibir el token de
+sesión — la persona ve el login pero no tiene contraseña todavía. Cada
+link de invitación es de un solo uso: si ya se abrió (o venció) y la
+persona no llegó a definir su contraseña, hay que reenviarlo — hay un
+botón **"Reenviar invitación"** por cada persona en Configuración →
+Equipo que genera un link nuevo sin tocar su fila de `equipo`.
 
 También se puede seguir dando de alta manualmente desde el dashboard de
 Supabase (**Authentication → Users → Add user**): en ese caso el trigger

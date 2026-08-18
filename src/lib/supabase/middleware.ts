@@ -28,8 +28,12 @@ export async function actualizarSesion(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const esRutaDeLogin = request.nextUrl.pathname.startsWith("/login");
+  // El link de invitación llega con el token de sesión en el hash de la
+  // URL (#access_token=...), que el navegador nunca envía al servidor: acá
+  // todavía no hay cookie de sesión, así que esta ruta no puede exigirla.
+  const esRutaDeInvitacion = request.nextUrl.pathname.startsWith("/invitacion");
 
-  if (!user && !esRutaDeLogin) {
+  if (!user && !esRutaDeLogin && !esRutaDeInvitacion) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

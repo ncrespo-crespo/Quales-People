@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Equipo, Rol } from "@/lib/types";
 import { actualizarMiembro } from "./actions";
+import { BotonReenviarInvitacion } from "./BotonReenviarInvitacion";
 import { FormularioInvitar } from "./FormularioInvitar";
 
 const ROLES: Rol[] = ["admin", "reclutador", "hiring_manager"];
@@ -59,6 +60,7 @@ export default async function ConfiguracionEquipoPage() {
               <input type="checkbox" name="activo" defaultChecked={persona.activo} />
               Activo
             </label>
+            <BotonReenviarInvitacion id={persona.id} />
             <button
               type="submit"
               className="ml-auto rounded bg-brand-navy px-3 py-1 text-xs font-medium text-white hover:brightness-110"
