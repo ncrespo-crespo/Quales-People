@@ -14,18 +14,43 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
 - **Vercel** — hosting del frontend.
 - **Tailwind CSS** — estilos.
 
-## Estado actual: Fase 0 — Setup
+## Estado actual: Fase 1 — Datos base y login
 
-Este commit cubre el scaffold inicial: proyecto Next.js corriendo, cliente de
-Supabase configurado (browser y server) y listo para desplegar en Vercel. Las
-tablas, el login y el resto de las funcionalidades se construyen en las fases
-siguientes (ver el PRD, sección 6 — Roadmap de construcción).
+- Fase 0: scaffold de Next.js, cliente de Supabase, deploy en Vercel.
+- Fase 1: tablas de la base de datos (sección 4 del PRD), login con
+  email/contraseña y alta automática de usuarios en `equipo`.
+
+El resto de las funcionalidades (Kanban, ficha de candidato, dashboard,
+Gmail) se construyen en las fases siguientes (ver el PRD, sección 6 —
+Roadmap de construcción).
 
 ## Requisitos previos
 
 1. Un proyecto creado en [supabase.com](https://supabase.com).
 2. Una cuenta en [vercel.com](https://vercel.com) conectada al repositorio de
    GitHub (para el deploy).
+
+## Base de datos
+
+Las migraciones viven en `supabase/migrations/`. Para aplicar la primera
+(tablas, vista de métricas y políticas de acceso):
+
+1. Abrir el proyecto en [supabase.com](https://supabase.com) →
+   **SQL Editor** → **New query**.
+2. Pegar el contenido de `supabase/migrations/0001_esquema_inicial.sql` y
+   ejecutarlo.
+
+Esto crea las tablas (`equipo`, `vacantes`, `estados_vacante`, `candidatos`,
+`historial_etapas`, `notas_entrevistas`, `comunicaciones`), la vista
+`vw_metricas_vacantes` y los 9 estados iniciales de vacante.
+
+### Alta de usuarios del equipo
+
+Por ahora se crean desde el dashboard de Supabase: **Authentication → Users
+→ Add user** (con email y contraseña). Al primer login, un trigger crea
+automáticamente su fila en `equipo` con rol `reclutador` (o `admin` si el
+email es `ncrespo@qualesgroup.com`). Para cambiar el rol de alguien más a
+`admin`, editar la fila correspondiente en la tabla `equipo`.
 
 ## Desarrollo local
 
