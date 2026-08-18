@@ -68,31 +68,25 @@ export const ETAPAS_CANDIDATO = [
   "Descartado",
 ] as const;
 
+// Datos de la persona. Un candidato puede tener varias postulaciones (una
+// por cada proceso de selección en el que participa, a veces en simultáneo)
+// — ver `Postulacion` más abajo.
 export type Candidato = {
   id: string;
   nombre_completo: string;
   email: string | null;
   telefono: string | null;
-  vacante_id: string | null;
-  reclutador_asignado_id: string | null;
-  etapa_actual: string;
   cv_url: string | null;
   linkedin_url: string | null;
   origen: string | null;
   fecha_ingreso: string;
-  descartado_motivo: string | null;
   oculto: boolean;
 };
 
-export type CandidatoConDias = Candidato & {
-  fecha_desde_etapa_actual: string | null;
-  dias_en_etapa: number | null;
-};
-
-// Campos agregados en la migración 0004 a partir de la planilla
+// Campos de perfil agregados en la migración 0004 a partir de la planilla
 // "Candidatosas" (ver PRD). Todos opcionales: solo están completos en los
 // candidatos importados, no en los que se cargan desde el formulario.
-export type CandidatoImportado = {
+export type CandidatoPerfil = {
   apellido: string | null;
   pais: string | null;
   provincia_estado: string | null;
@@ -112,6 +106,24 @@ export type CandidatoImportado = {
   tipo_candidato: string | null;
   disponibilidad_ingreso: string | null;
   fuente_importada: string | null;
+};
+
+export type CandidatoCompleto = Candidato & CandidatoPerfil;
+
+// La relación candidato <-> vacante: un candidato puede tener más de una
+// postulación (a la misma vacante no, pero sí a varias en paralelo o a lo
+// largo del tiempo), cada una con su propia etapa e historial. vacante_id
+// es nullable: los candidatos importados de la planilla no traían esa
+// relación, y quedaron como "postulación sin vacante asignada todavía".
+export type Postulacion = {
+  id: string;
+  candidato_id: string;
+  vacante_id: string | null;
+  etapa_actual: string;
+  reclutador_asignado_id: string | null;
+  descartado_motivo: string | null;
+  fecha_postulacion: string;
+  // proceso de selección
   fecha_primer_contacto: string | null;
   fecha_screening_hr: string | null;
   seniority_propuesto_hr: string | null;
@@ -120,6 +132,8 @@ export type CandidatoImportado = {
   seniority_propuesto_area: string | null;
   feedback_entrevista: string | null;
   feedback_entrevista_area: string | null;
+  estado_final_importado: string | null;
+  // oferta laboral
   avanza_ol: boolean | null;
   fecha_envio_ol: string | null;
   aceptacion_ol: boolean | null;
@@ -128,7 +142,7 @@ export type CandidatoImportado = {
   fecha_ingreso_efectiva: string | null;
   feedback_proceso_candidato: string | null;
   licencias_programadas: string | null;
-  estado_final_importado: string | null;
+  // onboarding
   ob_cliente: string | null;
   ob_proyecto: string | null;
   ob_induccion_empresa: string | null;
@@ -141,16 +155,18 @@ export type CandidatoImportado = {
   ob_fecha_recepcion_elementos: string | null;
 };
 
-export type CandidatoCompleto = Candidato & CandidatoImportado;
-
-export type CandidatoFicha = CandidatoCompleto & {
+export type PostulacionConDias = Postulacion & {
+  nombre_completo: string;
+  candidato_oculto: boolean;
+  candidato_origen: string | null;
+  candidato_linkedin_url: string | null;
   fecha_desde_etapa_actual: string | null;
   dias_en_etapa: number | null;
 };
 
 export type HistorialEtapa = {
   id: string;
-  candidato_id: string;
+  postulacion_id: string;
   etapa_anterior: string | null;
   etapa_nueva: string;
   movido_por_id: string | null;

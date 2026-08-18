@@ -10,23 +10,24 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import type { CandidatoConDias } from "@/lib/types";
+import type { PostulacionConDias } from "@/lib/types";
 import { ETAPAS_CANDIDATO } from "@/lib/types";
-import { moverCandidato } from "../actions";
+import { moverPostulacion } from "../postulaciones/actions";
 
 const COLUMNAS_COLAPSADAS_POR_DEFECTO = new Set(["Contratado", "Descartado"]);
 
 export function TableroCandidatos({
-  candidatosIniciales,
+  postulacionesIniciales,
   nombrePorId,
 }: {
-  candidatosIniciales: CandidatoConDias[];
+  postulacionesIniciales: PostulacionConDias[];
   nombrePorId: Map<string, string>;
 }) {
-  const [candidatos, setCandidatos] = useState(candidatosIniciales);
+  const [postulaciones, setPostulaciones] = useState(postulacionesIniciales);
   const [colapsadas, setColapsadas] = useState(COLUMNAS_COLAPSADAS_POR_DEFECTO);
   const [error, setError] = useState<string | null>(null);
   const [pendiente, setPendiente] = useState<{
+    postulacionId: string;
     candidatoId: string;
     etapaAnterior: string;
     etapaNueva: string;
@@ -36,26 +37,31 @@ export function TableroCandidatos({
   function alSoltar(evento: DragEndEvent) {
     const { active, over } = evento;
     if (!over) return;
-    const candidato = candidatos.find((c) => c.id === String(active.id));
+    const postulacion = postulaciones.find((p) => p.id === String(active.id));
     const etapaNueva = String(over.id);
-    if (!candidato || candidato.etapa_actual === etapaNueva) return;
-    setPendiente({ candidatoId: candidato.id, etapaAnterior: candidato.etapa_actual, etapaNueva });
+    if (!postulacion || postulacion.etapa_actual === etapaNueva) return;
+    setPendiente({
+      postulacionId: postulacion.id,
+      candidatoId: postulacion.candidato_id,
+      etapaAnterior: postulacion.etapa_actual,
+      etapaNueva,
+    });
   }
 
   async function confirmarMovimiento(nota: string | null) {
     if (!pendiente) return;
-    const { candidatoId, etapaAnterior, etapaNueva } = pendiente;
+    const { postulacionId, candidatoId, etapaAnterior, etapaNueva } = pendiente;
     setPendiente(null);
     setError(null);
-    setCandidatos((prev) =>
-      prev.map((c) => (c.id === candidatoId ? { ...c, etapa_actual: etapaNueva } : c)),
+    setPostulaciones((prev) =>
+      prev.map((p) => (p.id === postulacionId ? { ...p, etapa_actual: etapaNueva } : p)),
     );
 
-    const resultado = await moverCandidato(candidatoId, etapaAnterior, etapaNueva, nota);
+    const resultado = await moverPostulacion(postulacionId, candidatoId, etapaAnterior, etapaNueva, nota);
     if (resultado.error) {
       setError(resultado.error);
-      setCandidatos((prev) =>
-        prev.map((c) => (c.id === candidatoId ? { ...c, etapa_actual: etapaAnterior } : c)),
+      setPostulaciones((prev) =>
+        prev.map((p) => (p.id === postulacionId ? { ...p, etapa_actual: etapaAnterior } : p)),
       );
     }
   }
@@ -82,7 +88,7 @@ export function TableroCandidatos({
             <Columna
               key={etapa}
               etapa={etapa}
-              candidatos={candidatos.filter((c) => c.etapa_actual === etapa)}
+              postulaciones={postulaciones.filter((p) => p.etapa_actual === etapa)}
               nombrePorId={nombrePorId}
               colapsada={colapsadas.has(etapa)}
               onToggle={() => alternarColapso(etapa)}
@@ -104,13 +110,13 @@ export function TableroCandidatos({
 
 function Columna({
   etapa,
-  candidatos,
+  postulaciones,
   nombrePorId,
   colapsada,
   onToggle,
 }: {
   etapa: string;
-  candidatos: CandidatoConDias[];
+  postulaciones: PostulacionConDias[];
   nombrePorId: Map<string, string>;
   colapsada: boolean;
   onToggle: () => void;
@@ -127,7 +133,7 @@ function Columna({
         }`}
         style={{ writingMode: "vertical-rl" }}
       >
-        {etapa} ({candidatos.length})
+        {etapa} ({postulaciones.length})
       </button>
     );
   }
@@ -144,11 +150,11 @@ function Columna({
         className="flex items-center justify-between rounded-t bg-black/5 px-3 py-2 text-left text-sm font-semibold text-zinc-700 hover:bg-black/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
       >
         <span>{etapa}</span>
-        <span className="text-xs font-normal">{candidatos.length}</span>
+        <span className="text-xs font-normal">{postulaciones.length}</span>
       </button>
       <div className="flex min-h-[4rem] flex-1 flex-col gap-2 p-2">
-        {candidatos.map((candidato) => (
-          <Tarjeta key={candidato.id} candidato={candidato} nombrePorId={nombrePorId} />
+        {postulaciones.map((postulacion) => (
+          <Tarjeta key={postulacion.id} postulacion={postulacion} nombrePorId={nombrePorId} />
         ))}
       </div>
     </div>
@@ -156,14 +162,14 @@ function Columna({
 }
 
 function Tarjeta({
-  candidato,
+  postulacion,
   nombrePorId,
 }: {
-  candidato: CandidatoConDias;
+  postulacion: PostulacionConDias;
   nombrePorId: Map<string, string>;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: candidato.id,
+    id: postulacion.id,
   });
 
   return (
@@ -180,16 +186,16 @@ function Tarjeta({
         isDragging ? "opacity-50" : ""
       }`}
     >
-      <p className="font-medium text-black dark:text-zinc-50">{candidato.nombre_completo}</p>
+      <p className="font-medium text-black dark:text-zinc-50">{postulacion.nombre_completo}</p>
       <div className="mt-1 flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
         <span>
-          {candidato.reclutador_asignado_id
-            ? (nombrePorId.get(candidato.reclutador_asignado_id) ?? "—")
+          {postulacion.reclutador_asignado_id
+            ? (nombrePorId.get(postulacion.reclutador_asignado_id) ?? "—")
             : "Sin asignar"}
         </span>
-        {candidato.dias_en_etapa !== null && (
+        {postulacion.dias_en_etapa !== null && (
           <span className="rounded bg-black/5 px-1.5 py-0.5 dark:bg-white/10">
-            {candidato.dias_en_etapa}d en etapa
+            {postulacion.dias_en_etapa}d en etapa
           </span>
         )}
       </div>

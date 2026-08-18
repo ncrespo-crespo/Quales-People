@@ -55,6 +55,21 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
   la posibilidad de ocultar un candidato del listado/tablero sin
   borrarlo (`candidatos.oculto`, con un checkbox "Mostrar ocultos" para
   volver a verlos).
+- Rediseño de candidatos → postulaciones (migración 0009): un candidato
+  puede estar en más de un proceso de selección a la vez. `candidatos`
+  quedó solo con datos de la persona (perfil); la relación con una
+  vacante (etapa, reclutador asignado, motivo de descarte, y todo el
+  detalle de proceso de selección/oferta laboral/onboarding importado de
+  la planilla) vive en la tabla nueva `postulaciones`, una fila por cada
+  búsqueda a la que se presentó. `historial_etapas` pasa a llevar la
+  trazabilidad por postulación. La ficha del candidato (`/candidatos/:id`)
+  ahora tiene una sección "Postulaciones" con una entrada por proceso
+  (cada una con su propio historial, y se puede agregar/eliminar). El
+  tablero (`/candidatos/kanban`, ahora "tablero de postulaciones")
+  muestra una tarjeta por postulación: si alguien está en dos búsquedas a
+  la vez, aparece dos veces, cada una en la columna de su propia etapa.
+  El listado `/candidatos` pasó a ser un directorio de personas (ya no
+  tiene etapa/vacante), con la cantidad de postulaciones de cada una.
 
 El resto de las funcionalidades (dashboard de métricas, Gmail) se
 construyen en las fases siguientes (ver el PRD, sección 6 — Roadmap de
@@ -92,6 +107,13 @@ Después correr también, en orden:
   elegido al invitar (ver "Alta de usuarios del equipo").
 - `0008_ocultar_candidatos.sql` — permite ocultar un candidato del
   listado/tablero sin borrarlo.
+- `0009_postulaciones.sql` — separa "quién es la persona" (`candidatos`)
+  de "en qué proceso está, para qué vacante" (`postulaciones`, N por
+  candidato). Migra los datos existentes sola, sin pedir nada: cada
+  candidato pasa a tener su primera postulación con lo que ya tenía
+  cargado. Importante correrla recién **después** de la carga inicial de
+  la planilla (más abajo), nunca antes — necesita que `candidatos` ya
+  tenga los datos para poder migrarlos.
 
 ### Carga inicial desde la planilla de reclutamiento
 

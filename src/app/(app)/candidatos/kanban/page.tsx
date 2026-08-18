@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import type { CandidatoConDias, Equipo, Vacante } from "@/lib/types";
+import type { Equipo, PostulacionConDias, Vacante } from "@/lib/types";
 import { FiltrosCandidatos } from "../FiltrosCandidatos";
 import { TableroCandidatos } from "./TableroCandidatos";
 
@@ -17,14 +17,14 @@ export default async function CandidatosKanbanPage({
   const { vacante, reclutador, origen, ocultos } = await searchParams;
   const supabase = await createClient();
 
-  let consulta = supabase.from("vw_candidatos_pipeline").select("*");
-  if (!ocultos) consulta = consulta.eq("oculto", false);
+  let consulta = supabase.from("vw_postulaciones_pipeline").select("*");
+  if (!ocultos) consulta = consulta.eq("candidato_oculto", false);
   if (vacante) consulta = consulta.eq("vacante_id", vacante);
   if (reclutador) consulta = consulta.eq("reclutador_asignado_id", reclutador);
-  if (origen) consulta = consulta.eq("origen", origen);
+  if (origen) consulta = consulta.eq("candidato_origen", origen);
 
-  const [{ data: candidatos }, { data: vacantes }, { data: equipo }] = await Promise.all([
-    consulta.returns<CandidatoConDias[]>(),
+  const [{ data: postulaciones }, { data: vacantes }, { data: equipo }] = await Promise.all([
+    consulta.returns<PostulacionConDias[]>(),
     supabase.from("vacantes").select("*").returns<Vacante[]>(),
     supabase.from("equipo").select("*").eq("activo", true).returns<Equipo[]>(),
   ]);
@@ -35,10 +35,10 @@ export default async function CandidatosKanbanPage({
     <div>
       <div className="flex items-center justify-between px-8 pt-8">
         <h1 className="text-xl font-bold text-brand-navy dark:text-white">
-          Tablero de candidatos
+          Tablero de postulaciones
         </h1>
         <Link href="/candidatos" className="text-sm text-brand-blue hover:underline">
-          Ver como tabla
+          Ver candidatos
         </Link>
       </div>
       <div className="px-8">
@@ -49,7 +49,7 @@ export default async function CandidatosKanbanPage({
           incluirOcultos
         />
       </div>
-      <TableroCandidatos candidatosIniciales={candidatos ?? []} nombrePorId={nombrePorId} />
+      <TableroCandidatos postulacionesIniciales={postulaciones ?? []} nombrePorId={nombrePorId} />
     </div>
   );
 }

@@ -2,19 +2,17 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Equipo, Vacante } from "@/lib/types";
-import { ETAPAS_CANDIDATO, ORIGENES_CANDIDATO } from "@/lib/types";
+import { ORIGENES_CANDIDATO } from "@/lib/types";
 
 export function FiltrosCandidatos({
   basePath,
   vacantes,
   equipo,
-  incluirEtapa = false,
   incluirOcultos = false,
 }: {
   basePath: string;
   vacantes: Vacante[];
   equipo: Equipo[];
-  incluirEtapa?: boolean;
   incluirOcultos?: boolean;
 }) {
   const router = useRouter();
@@ -32,21 +30,6 @@ export function FiltrosCandidatos({
 
   return (
     <div className="flex flex-wrap gap-3 pb-4 text-sm">
-      {incluirEtapa && (
-        <select
-          className="campo"
-          defaultValue={searchParams.get("etapa") ?? ""}
-          onChange={(e) => actualizar("etapa", e.target.value)}
-        >
-          <option value="">Todas las etapas</option>
-          {ETAPAS_CANDIDATO.map((e) => (
-            <option key={e} value={e}>
-              {e}
-            </option>
-          ))}
-        </select>
-      )}
-
       <select
         className="campo"
         defaultValue={searchParams.get("vacante") ?? ""}

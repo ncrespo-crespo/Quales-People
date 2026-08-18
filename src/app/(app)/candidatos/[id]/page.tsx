@@ -2,14 +2,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type {
-  CandidatoFicha,
+  CandidatoCompleto,
   Comunicacion,
   Equipo,
   HistorialEtapa,
   NotaEntrevista,
+  Postulacion,
   Vacante,
 } from "@/lib/types";
 import { agregarComunicacion, agregarNotaEntrevista } from "./actions";
+import { SeccionPostulaciones } from "./Postulaciones";
 import { TIPOS_COMUNICACION } from "@/lib/types";
 
 function formatearFecha(fecha: string | null) {
@@ -27,19 +29,19 @@ export default async function FichaCandidatoPage({
 
   const [
     { data: candidato },
-    { data: historial },
+    { data: postulaciones },
     { data: notas },
     { data: comunicaciones },
     { data: equipo },
     { data: vacantes },
   ] = await Promise.all([
-    supabase.from("vw_candidatos_pipeline").select("*").eq("id", id).single<CandidatoFicha>(),
+    supabase.from("candidatos").select("*").eq("id", id).single<CandidatoCompleto>(),
     supabase
-      .from("historial_etapas")
+      .from("postulaciones")
       .select("*")
       .eq("candidato_id", id)
-      .order("fecha", { ascending: false })
-      .returns<HistorialEtapa[]>(),
+      .order("fecha_postulacion", { ascending: false })
+      .returns<Postulacion[]>(),
     supabase
       .from("notas_entrevistas")
       .select("*")
@@ -60,8 +62,22 @@ export default async function FichaCandidatoPage({
     notFound();
   }
 
-  const nombrePorId = new Map((equipo ?? []).map((p) => [p.id, p.nombre ?? p.email]));
-  const vacante = (vacantes ?? []).find((v) => v.id === candidato.vacante_id);
+  const idsPostulaciones = (postulaciones ?? []).map((p) => p.id);
+  const { data: historial } = idsPostulaciones.length
+    ? await supabase
+        .from("historial_etapas")
+        .select("*")
+        .in("postulacion_id", idsPostulaciones)
+        .order("fecha", { ascending: false })
+        .returns<HistorialEtapa[]>()
+    : { data: [] as HistorialEtapa[] };
+
+  const historialPorPostulacion = new Map<string, HistorialEtapa[]>();
+  for (const h of historial ?? []) {
+    const lista = historialPorPostulacion.get(h.postulacion_id) ?? [];
+    lista.push(h);
+    historialPorPostulacion.set(h.postulacion_id, lista);
+  }
 
   let urlCv: string | null = null;
   if (candidato.cv_url) {
@@ -77,9 +93,8 @@ export default async function FichaCandidatoPage({
             {candidato.nombre_completo}
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            {candidato.etapa_actual}
-            {vacante ? ` · ${vacante.titulo}` : ""}
-            {candidato.dias_en_etapa !== null ? ` · ${candidato.dias_en_etapa} días en esta etapa` : ""}
+            {(postulaciones ?? []).length} postulación
+            {(postulaciones ?? []).length === 1 ? "" : "es"}
           </p>
         </div>
         <div className="flex gap-3 text-sm">
@@ -111,16 +126,8 @@ export default async function FichaCandidatoPage({
               ) : null
             }
           />
-          <Dato
-            label="Reclutador asignado"
-            valor={
-              candidato.reclutador_asignado_id
-                ? (nombrePorId.get(candidato.reclutador_asignado_id) ?? null)
-                : null
-            }
-          />
           <Dato label="Origen" valor={candidato.origen} />
-          <Dato label="Fecha de ingreso" valor={formatearFecha(candidato.fecha_ingreso)} />
+          <Dato label="Fecha de contacto" valor={formatearFecha(candidato.fecha_ingreso)} />
           <Dato
             label="Ubicación"
             valor={[candidato.localidad, candidato.pais].filter(Boolean).join(", ") || null}
@@ -134,9 +141,6 @@ export default async function FichaCandidatoPage({
           <Dato label="Stack principal" valor={candidato.stack_principal} />
           <Dato label="Tipo de candidato" valor={candidato.tipo_candidato} />
           <Dato label="Disponibilidad de ingreso" valor={candidato.disponibilidad_ingreso} />
-          {candidato.etapa_actual === "Descartado" && (
-            <Dato label="Motivo del descarte" valor={candidato.descartado_motivo} />
-          )}
           <Dato
             label="CV"
             valor={
@@ -155,27 +159,15 @@ export default async function FichaCandidatoPage({
         </dl>
       </Seccion>
 
-      <DatosImportados candidato={candidato} />
+      <PerfilOtrosDatos candidato={candidato} />
 
-      <Seccion titulo="Historial de etapas">
-        {(historial ?? []).length === 0 && (
-          <p className="text-sm text-zinc-500">Sin movimientos registrados.</p>
-        )}
-        <ol className="flex flex-col gap-3">
-          {(historial ?? []).map((h) => (
-            <li key={h.id} className="border-l-2 border-brand-blue/40 pl-3 text-sm">
-              <p className="text-black dark:text-zinc-50">
-                {h.etapa_anterior ? `${h.etapa_anterior} → ${h.etapa_nueva}` : `Alta en ${h.etapa_nueva}`}
-              </p>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                {formatearFecha(h.fecha)}
-                {h.movido_por_id ? ` · ${nombrePorId.get(h.movido_por_id) ?? "—"}` : ""}
-              </p>
-              {h.nota && <p className="mt-1 text-zinc-600 dark:text-zinc-300">{h.nota}</p>}
-            </li>
-          ))}
-        </ol>
-      </Seccion>
+      <SeccionPostulaciones
+        candidatoId={id}
+        postulaciones={postulaciones ?? []}
+        historialPorPostulacion={historialPorPostulacion}
+        vacantes={vacantes ?? []}
+        equipo={equipo ?? []}
+      />
 
       <Seccion titulo="Notas de entrevistas">
         <div className="mb-4 flex flex-col gap-3">
@@ -183,7 +175,7 @@ export default async function FichaCandidatoPage({
             <div key={nota.id} className="rounded border border-black/10 p-3 text-sm dark:border-white/10">
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
                 {formatearFecha(nota.fecha)}
-                {nota.entrevistador_id ? ` · ${nombrePorId.get(nota.entrevistador_id) ?? "—"}` : ""}
+                {nota.entrevistador_id ? ` · ${equipo?.find((e) => e.id === nota.entrevistador_id)?.nombre ?? "—"}` : ""}
                 {nota.etapa ? ` · ${nota.etapa}` : ""}
                 {nota.calificacion ? ` · ${nota.calificacion}/5` : ""}
               </p>
@@ -275,86 +267,33 @@ function Dato({ label, valor }: { label: string; valor: React.ReactNode }) {
   );
 }
 
-function DatosImportados({ candidato }: { candidato: CandidatoFicha }) {
-  const grupos: { titulo: string; campos: [string, React.ReactNode][] }[] = [
-    {
-      titulo: "Perfil (otros datos)",
-      campos: [
-        ["Provincia / estado", candidato.provincia_estado],
-        ["Género", candidato.genero],
-        ["Formación técnica", candidato.formacion_tecnica],
-        ["Lugar de empleo actual", candidato.lugar_empleo_actual],
-        ["Expectativa salarial", candidato.expectativa_salarial],
-        ["Rate freelance", candidato.rate_fl],
-        ["Fuente (importada)", candidato.fuente_importada],
-      ],
-    },
-    {
-      titulo: "Proceso de selección",
-      campos: [
-        ["Fecha primer contacto", formatearFecha(candidato.fecha_primer_contacto)],
-        ["Fecha screening HR", formatearFecha(candidato.fecha_screening_hr)],
-        ["Seniority propuesto (HR)", candidato.seniority_propuesto_hr],
-        ["Feedback entrevista HR", candidato.feedback_entrevista_hr],
-        ["Fecha entrevista área", formatearFecha(candidato.fecha_entrevista_area)],
-        ["Seniority propuesto (área)", candidato.seniority_propuesto_area],
-        ["Feedback entrevista", candidato.feedback_entrevista],
-        ["Feedback entrevista área", candidato.feedback_entrevista_area],
-        ["Estado final (importado)", candidato.estado_final_importado],
-      ],
-    },
-    {
-      titulo: "Oferta laboral",
-      campos: [
-        ["¿Avanza a OL?", candidato.avanza_ol === null ? null : candidato.avanza_ol ? "Sí" : "No"],
-        ["Fecha de envío OL", formatearFecha(candidato.fecha_envio_ol)],
-        ["Aceptación OL", candidato.aceptacion_ol === null ? null : candidato.aceptacion_ol ? "Sí" : "No"],
-        ["Fecha aceptación/rechazo OL", formatearFecha(candidato.fecha_aceptacion_rechazo_ol)],
-        ["Motivo de rechazo OL", candidato.motivo_rechazo_ol],
-        ["Fecha de ingreso efectiva", formatearFecha(candidato.fecha_ingreso_efectiva)],
-        ["Feedback del proceso al candidato", candidato.feedback_proceso_candidato],
-        ["Licencias programadas", candidato.licencias_programadas],
-      ],
-    },
-    {
-      titulo: "Onboarding",
-      campos: [
-        ["Cliente", candidato.ob_cliente],
-        ["Proyecto", candidato.ob_proyecto],
-        ["Inducción empresa", candidato.ob_induccion_empresa],
-        ["Inducción empresa · horario", candidato.ob_induccion_empresa_horario],
-        ["Inducción al área · responsable", candidato.ob_induccion_area_responsable],
-        ["Inducción al área · horario", candidato.ob_induccion_area_horario],
-        ["Inducción a proyecto · responsable", candidato.ob_induccion_proyecto_responsable],
-        ["Inducción a proyecto · horario", candidato.ob_induccion_proyecto_horario],
-        ["Envío de elementos de trabajo", formatearFecha(candidato.ob_fecha_envio_elementos)],
-        ["Recepción de elementos de trabajo", formatearFecha(candidato.ob_fecha_recepcion_elementos)],
-      ],
-    },
+function PerfilOtrosDatos({ candidato }: { candidato: CandidatoCompleto }) {
+  const campos: [string, React.ReactNode][] = [
+    ["Provincia / estado", candidato.provincia_estado],
+    ["Género", candidato.genero],
+    ["Formación técnica", candidato.formacion_tecnica],
+    ["Lugar de empleo actual", candidato.lugar_empleo_actual],
+    ["Expectativa salarial", candidato.expectativa_salarial],
+    ["Rate freelance", candidato.rate_fl],
+    ["Tipo de moneda", candidato.tipo_moneda],
+    ["Fuente (importada)", candidato.fuente_importada],
   ];
 
-  const gruposConDatos = grupos.filter((g) =>
-    g.campos.some(([, valor]) => valor !== null && valor !== undefined && valor !== "—"),
-  );
-
-  if (gruposConDatos.length === 0) return null;
+  const tieneDatos = campos.some(([, valor]) => valor !== null && valor !== undefined);
+  if (!tieneDatos) return null;
 
   return (
-    <Seccion titulo="Información importada de la planilla">
-      <div className="flex flex-col gap-2">
-        {gruposConDatos.map((grupo) => (
-          <details key={grupo.titulo} className="rounded border border-black/10 p-3 dark:border-white/10">
-            <summary className="cursor-pointer text-sm font-medium text-black dark:text-zinc-50">
-              {grupo.titulo}
-            </summary>
-            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              {grupo.campos.map(([label, valor]) => (
-                <Dato key={label} label={label} valor={valor} />
-              ))}
-            </dl>
-          </details>
-        ))}
-      </div>
+    <Seccion titulo="Perfil">
+      <details className="rounded border border-black/10 p-3 dark:border-white/10">
+        <summary className="cursor-pointer text-sm font-medium text-black dark:text-zinc-50">
+          Otros datos de perfil
+        </summary>
+        <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+          {campos.map(([label, valor]) => (
+            <Dato key={label} label={label} valor={valor} />
+          ))}
+        </dl>
+      </details>
     </Seccion>
   );
 }
