@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Candidato, Postulacion } from "@/lib/types";
+import { ANIO_POR_DEFECTO } from "@/lib/types";
+import { rangoAnio } from "@/lib/fechas";
 import { EncabezadoOrdenable } from "@/components/EncabezadoOrdenable";
+import { FiltroAnio } from "@/components/FiltroAnio";
 import { FiltrosPersonas } from "./FiltrosPersonas";
 import { alternarOcultoCandidato } from "./actions";
 
@@ -18,21 +21,26 @@ export default async function CandidatosPage({
   searchParams: Promise<{
     origen?: string;
     ocultos?: string;
+    anio?: string;
     sort?: string;
     dir?: string;
   }>;
 }) {
   const resueltos = await searchParams;
   const { origen, ocultos } = resueltos;
+  const anio = Number(resueltos.anio) || ANIO_POR_DEFECTO;
   const sort = resueltos.sort && COLUMNAS_ORDENABLES.has(resueltos.sort)
     ? resueltos.sort
     : "fecha_ingreso";
   const dir = resueltos.dir === "asc" ? "asc" : "desc";
   const supabase = await createClient();
+  const { desde, hasta } = rangoAnio(anio);
 
   let consulta = supabase
     .from("candidatos")
     .select("*")
+    .gte("fecha_ingreso", desde)
+    .lt("fecha_ingreso", hasta)
     .order(sort, { ascending: dir === "asc", nullsFirst: false });
   if (!ocultos) consulta = consulta.eq("oculto", false);
   if (origen) consulta = consulta.eq("origen", origen);
@@ -74,7 +82,10 @@ export default async function CandidatosPage({
         </div>
       </div>
 
-      <FiltrosPersonas />
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <FiltroAnio basePath="/candidatos" />
+        <FiltrosPersonas />
+      </div>
 
       <div className="overflow-x-auto rounded border border-black/10 dark:border-white/10">
         <table className="w-full text-left text-sm">

@@ -14,7 +14,7 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
 - **Vercel** — hosting del frontend.
 - **Tailwind CSS** — estilos.
 
-## Estado actual: Fase 4 — Ficha de candidato
+## Estado actual: Fase 5 — Overview y métricas
 
 - Fase 0: scaffold de Next.js, cliente de Supabase, deploy en Vercel.
 - Fase 1: tablas de la base de datos (sección 4 del PRD), login con
@@ -70,8 +70,19 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
   la vez, aparece dos veces, cada una en la columna de su propia etapa.
   El listado `/candidatos` pasó a ser un directorio de personas (ya no
   tiene etapa/vacante), con la cantidad de postulaciones de cada una.
+- Fase 5: `/` ahora es el **Overview** (primera pestaña del nav):
+  cantidad de vacantes / activas / Hired / Cancelled, TTF promedio, días
+  open promedio, tasa de conversión a Hired, distribución por estado y
+  por prioridad, y carga de trabajo por reclutador (activas, Hired, TTF
+  promedio) — todo filtrable por reclutador. Tanto el Overview como los
+  listados de `/vacantes` (por `fecha_inicio_proceso`) y `/candidatos`
+  (por `fecha_ingreso`, la fecha de contacto) se filtran por año, con
+  **2026** como valor por defecto (`ANIO_POR_DEFECTO` en
+  `src/lib/types.ts`) y selector para cambiarlo. Una vacante o candidato
+  sin esa fecha cargada no va a aparecer bajo ningún año — no hay forma
+  de ubicarlo en el tiempo sin ese dato.
 
-El resto de las funcionalidades (dashboard de métricas, Gmail) se
+El resto de las funcionalidades (Gmail) se
 construyen en las fases siguientes (ver el PRD, sección 6 — Roadmap de
 construcción).
 

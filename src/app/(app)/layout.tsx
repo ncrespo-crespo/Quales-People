@@ -25,6 +25,9 @@ export default async function AppLayout({
           <Link href="/" className="text-base font-bold text-white">
             Quales <span className="font-normal text-white/70">ATS</span>
           </Link>
+          <Link href="/" className="hover:text-white">
+            Overview
+          </Link>
           <Link href="/vacantes" className="hover:text-white">
             Vacantes
           </Link>

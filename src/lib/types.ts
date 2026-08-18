@@ -24,6 +24,10 @@ export type PrioridadVacante = (typeof PRIORIDADES_VACANTE)[number];
 // en el listado y el tablero.
 export const DIAS_OPEN_CRITICO = 3;
 
+// Año por defecto para el Overview y los listados de vacantes/candidatos.
+export const ANIO_POR_DEFECTO = 2026;
+export const ANIOS_DISPONIBLES = [2024, 2025, 2026, 2027] as const;
+
 export type Vacante = {
   id: string;
   titulo: string;

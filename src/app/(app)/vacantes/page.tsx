@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Equipo, EstadoVacante, VacanteConMetricas } from "@/lib/types";
+import { ANIO_POR_DEFECTO } from "@/lib/types";
+import { rangoAnio } from "@/lib/fechas";
 import { EncabezadoOrdenable } from "@/components/EncabezadoOrdenable";
+import { FiltroAnio } from "@/components/FiltroAnio";
 import { FiltrosVacantes } from "./FiltrosVacantes";
 import { esCritico, InsigniaCritico, InsigniaPrioridad } from "./insignias";
 
@@ -27,21 +30,26 @@ export default async function VacantesPage({
     reclutador?: string;
     cliente?: string;
     prioridad?: string;
+    anio?: string;
     sort?: string;
     dir?: string;
   }>;
 }) {
   const resueltos = await searchParams;
   const { estado, reclutador, cliente, prioridad } = resueltos;
+  const anio = Number(resueltos.anio) || ANIO_POR_DEFECTO;
   const sort = resueltos.sort && COLUMNAS_ORDENABLES.has(resueltos.sort)
     ? resueltos.sort
     : "fecha_inicio_proceso";
   const dir = resueltos.dir === "asc" ? "asc" : "desc";
   const supabase = await createClient();
+  const { desde, hasta } = rangoAnio(anio);
 
   let consulta = supabase
     .from("vw_metricas_vacantes")
     .select("*")
+    .gte("fecha_inicio_proceso", desde)
+    .lt("fecha_inicio_proceso", hasta)
     .order(sort, { ascending: dir === "asc", nullsFirst: false });
   if (estado) consulta = consulta.eq("estado_id", estado);
   if (reclutador) consulta = consulta.eq("reclutador_responsable_id", reclutador);
@@ -82,7 +90,10 @@ export default async function VacantesPage({
         </div>
       </div>
 
-      <FiltrosVacantes estados={estados ?? []} equipo={equipo ?? []} />
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <FiltroAnio basePath="/vacantes" />
+        <FiltrosVacantes estados={estados ?? []} equipo={equipo ?? []} />
+      </div>
 
       <div className="overflow-x-auto rounded border border-black/10 dark:border-white/10">
         <table className="w-full text-left text-sm">
