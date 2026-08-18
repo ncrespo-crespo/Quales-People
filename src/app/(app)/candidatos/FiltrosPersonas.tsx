@@ -29,6 +29,13 @@ export function FiltrosPersonas({
 
   return (
     <>
+      <input
+        className="campo"
+        placeholder="Buscar por nombre o apellido..."
+        defaultValue={searchParams.get("q") ?? ""}
+        onChange={(e) => actualizar("q", e.target.value)}
+      />
+
       <select
         className="campo"
         defaultValue={searchParams.get("vacante") ?? ""}

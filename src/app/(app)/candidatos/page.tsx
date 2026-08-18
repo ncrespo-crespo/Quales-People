@@ -21,6 +21,7 @@ export default async function CandidatosPage({
   searchParams,
 }: {
   searchParams: Promise<{
+    q?: string;
     origen?: string;
     ocultos?: string;
     anio?: string;
@@ -33,7 +34,7 @@ export default async function CandidatosPage({
   }>;
 }) {
   const resueltos = await searchParams;
-  const { origen, ocultos, vacante, provincia, ingles, stack } = resueltos;
+  const { q, origen, ocultos, vacante, provincia, ingles, stack } = resueltos;
   const anio = Number(resueltos.anio) || ANIO_POR_DEFECTO;
   const sort = resueltos.sort && COLUMNAS_ORDENABLES.has(resueltos.sort)
     ? resueltos.sort
@@ -58,6 +59,7 @@ export default async function CandidatosPage({
     .lt("fecha_ingreso", hasta)
     .order(sort, { ascending: dir === "asc", nullsFirst: false });
   if (!ocultos) consulta = consulta.eq("oculto", false);
+  if (q) consulta = consulta.ilike("nombre_completo", `%${q}%`);
   if (origen) consulta = consulta.eq("origen", origen);
   if (provincia) consulta = consulta.eq("provincia_estado", provincia);
   if (ingles) consulta = consulta.eq("nivel_ingles", ingles);
