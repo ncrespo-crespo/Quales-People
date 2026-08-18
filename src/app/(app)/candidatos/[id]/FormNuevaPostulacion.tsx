@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Equipo, Vacante } from "@/lib/types";
 import { etiquetaVacante } from "@/lib/vacantes";
 import { crearPostulacion } from "../postulaciones/actions";
+import { BotonGuardarPostulacion } from "./BotonGuardarPostulacion";
 
 export function FormNuevaPostulacion({
   candidatoId,
@@ -49,12 +50,7 @@ export function FormNuevaPostulacion({
           </option>
         ))}
       </select>
-      <button
-        type="submit"
-        className="rounded bg-brand-green px-3 py-1.5 text-sm font-medium text-brand-navy hover:brightness-95"
-      >
-        Guardar postulación
-      </button>
+      <BotonGuardarPostulacion />
       <button
         type="button"
         onClick={() => setAbierto(false)}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { CandidatoCompleto, Equipo, Vacante } from "@/lib/types";
 import { ORIGENES_CANDIDATO } from "@/lib/types";
 import { etiquetaVacante } from "@/lib/vacantes";
+import { BotonGuardar } from "./BotonGuardar";
 
 // Los candidatos importados solo tenían "nombre_completo" + "apellido"
 // (sin nombre de pila suelto). Para no dejar el campo "Nombres" vacío en
@@ -168,12 +169,7 @@ export function FormularioCandidato({
 
       <SeccionPerfil candidato={candidato} />
 
-      <button
-        type="submit"
-        className="mt-2 rounded bg-brand-navy px-4 py-2 text-sm font-medium text-white hover:brightness-110"
-      >
-        Guardar
-      </button>
+      <BotonGuardar />
     </form>
   );
 }

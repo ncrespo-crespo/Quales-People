@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useFormStatus } from "react-dom";
 import { ETAPAS_CANDIDATO } from "@/lib/types";
 import type { Equipo, HistorialEtapa, Postulacion, Vacante } from "@/lib/types";
 import { etiquetaVacante } from "@/lib/vacantes";
@@ -275,12 +276,7 @@ function FormularioEdicion({
       </div>
 
       <div className="flex gap-2">
-        <button
-          type="submit"
-          className="self-start rounded bg-brand-navy px-3 py-1.5 text-sm font-medium text-white hover:brightness-110"
-        >
-          Guardar postulación
-        </button>
+        <BotonGuardarEdicion />
         <button
           type="button"
           onClick={onCancelar}
@@ -290,6 +286,20 @@ function FormularioEdicion({
         </button>
       </div>
     </form>
+  );
+}
+
+function BotonGuardarEdicion() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="self-start rounded bg-brand-navy px-3 py-1.5 text-sm font-medium text-white hover:brightness-110 disabled:opacity-50"
+    >
+      {pending ? "Guardando..." : "Guardar postulación"}
+    </button>
   );
 }
 
