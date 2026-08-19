@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import type { Vacante } from "@/lib/types";
+import type { EstadoCandidato, Vacante } from "@/lib/types";
 import { ORIGENES_CANDIDATO } from "@/lib/types";
 import { etiquetaVacante } from "@/lib/vacantes";
 import { FiltroMultiple } from "@/components/FiltroMultiple";
@@ -10,10 +10,12 @@ export function FiltrosPersonas({
   vacantes,
   provincias,
   nivelesIngles,
+  estados,
 }: {
   vacantes: Vacante[];
   provincias: string[];
   nivelesIngles: string[];
+  estados: readonly EstadoCandidato[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -71,6 +73,13 @@ export function FiltrosPersonas({
         basePath="/candidatos"
         etiquetaTodos="Todos los orígenes"
         opciones={ORIGENES_CANDIDATO.map((o) => ({ value: o, label: o }))}
+      />
+
+      <FiltroMultiple
+        campo="estado"
+        basePath="/candidatos"
+        etiquetaTodos="Todo estado"
+        opciones={estados.map((e) => ({ value: e, label: e }))}
       />
 
       <label className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400">

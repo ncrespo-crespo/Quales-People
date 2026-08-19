@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Candidato, Postulacion, Vacante } from "@/lib/types";
-import { ANIO_POR_DEFECTO } from "@/lib/types";
+import { ANIO_POR_DEFECTO, ESTADOS_CANDIDATO } from "@/lib/types";
 import { rangoAnio } from "@/lib/fechas";
 import { EncabezadoOrdenable } from "@/components/EncabezadoOrdenable";
 import { FiltroAnio } from "@/components/FiltroAnio";
@@ -24,6 +24,7 @@ export default async function CandidatosPage({
   searchParams: Promise<{
     q?: string;
     origen?: string;
+    estado?: string;
     ocultos?: string;
     anio?: string;
     vacante?: string;
@@ -36,7 +37,7 @@ export default async function CandidatosPage({
   }>;
 }) {
   const resueltos = await searchParams;
-  const { q, origen, ocultos, vacante, provincia, ingles, stack } = resueltos;
+  const { q, origen, estado, ocultos, vacante, provincia, ingles, stack } = resueltos;
   const anio = Number(resueltos.anio) || ANIO_POR_DEFECTO;
   const sort = resueltos.sort && COLUMNAS_ORDENABLES.has(resueltos.sort)
     ? resueltos.sort
@@ -64,6 +65,7 @@ export default async function CandidatosPage({
   if (!ocultos) consulta = consulta.eq("oculto", false);
   if (q) consulta = consulta.ilike("nombre_completo", `%${q}%`);
   if (origen) consulta = consulta.in("origen", origen.split(","));
+  if (estado) consulta = consulta.in("estado", estado.split(","));
   if (provincia) consulta = consulta.in("provincia_estado", provincia.split(","));
   if (ingles) consulta = consulta.in("nivel_ingles", ingles.split(","));
   if (stack) consulta = consulta.ilike("stack_principal", `%${stack}%`);
@@ -75,11 +77,8 @@ export default async function CandidatosPage({
       consulta.returns<Candidato[]>(),
       supabase
         .from("postulaciones")
-        .select("id, candidato_id, etapa_actual, estado_final, fecha_postulacion")
-        .order("fecha_postulacion", { ascending: false })
-        .returns<
-          Pick<Postulacion, "id" | "candidato_id" | "etapa_actual" | "estado_final" | "fecha_postulacion">[]
-        >(),
+        .select("id, candidato_id")
+        .returns<Pick<Postulacion, "id" | "candidato_id">[]>(),
       supabase.from("vacantes").select("*").returns<Vacante[]>(),
       supabase
         .from("candidatos")
@@ -88,14 +87,8 @@ export default async function CandidatosPage({
     ]);
 
   const postulacionesPorCandidato = new Map<string, number>();
-  // Ordenadas por fecha_postulacion desc: la primera que aparece por
-  // candidato es su postulación más reciente.
-  const estadoPorCandidato = new Map<string, string>();
   for (const p of postulaciones ?? []) {
     postulacionesPorCandidato.set(p.candidato_id, (postulacionesPorCandidato.get(p.candidato_id) ?? 0) + 1);
-    if (!estadoPorCandidato.has(p.candidato_id)) {
-      estadoPorCandidato.set(p.candidato_id, p.estado_final ?? p.etapa_actual);
-    }
   }
 
   const provincias = [...new Set((perfiles ?? []).map((p) => p.provincia_estado).filter((v): v is string => !!v))].sort();
@@ -131,7 +124,7 @@ export default async function CandidatosPage({
 
       <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
         <FiltroAnio basePath="/candidatos" />
-        <FiltrosPersonas vacantes={vacantes ?? []} provincias={provincias} nivelesIngles={nivelesIngles} />
+        <FiltrosPersonas vacantes={vacantes ?? []} provincias={provincias} nivelesIngles={nivelesIngles} estados={ESTADOS_CANDIDATO} />
       </div>
 
       <p className="mb-2 text-xs text-zinc-500 dark:text-zinc-400">
@@ -165,7 +158,7 @@ export default async function CandidatosPage({
                   </Link>
                 </td>
                 <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
-                  {estadoPorCandidato.get(candidato.id) ?? "—"}
+                  {candidato.estado ?? "—"}
                 </td>
                 <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
                   {candidato.origen ?? "—"}

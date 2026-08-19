@@ -81,6 +81,7 @@ export async function crearCandidato(formData: FormData) {
       telefono: valorONulo(formData, "telefono"),
       linkedin_url: valorONulo(formData, "linkedin_url"),
       origen: valorONulo(formData, "origen"),
+      estado: valorONulo(formData, "estado"),
       // perfil
       pais: valorONulo(formData, "pais"),
       provincia_estado: valorONulo(formData, "provincia_estado"),
@@ -160,6 +161,7 @@ export async function actualizarCandidato(id: string, formData: FormData) {
         telefono: valorONulo(formData, "telefono"),
         linkedin_url: valorONulo(formData, "linkedin_url"),
         origen: valorONulo(formData, "origen"),
+        estado: valorONulo(formData, "estado"),
         fecha_ingreso: valorONulo(formData, "fecha_ingreso") ?? new Date().toISOString(),
         oculto: formData.get("oculto") === "on",
         ...(rutaCv ? { cv_url: rutaCv } : {}),

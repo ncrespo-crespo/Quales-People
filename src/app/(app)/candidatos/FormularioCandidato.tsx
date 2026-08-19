@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { CandidatoCompleto, Equipo, Vacante } from "@/lib/types";
-import { MONEDAS, ORIGENES_CANDIDATO } from "@/lib/types";
+import { ESTADOS_CANDIDATO, MONEDAS, ORIGENES_CANDIDATO } from "@/lib/types";
 import { etiquetaVacante } from "@/lib/vacantes";
 import { BotonGuardar } from "./BotonGuardar";
 
@@ -90,6 +90,17 @@ export function FormularioCandidato({
           {ORIGENES_CANDIDATO.map((origen) => (
             <option key={origen} value={origen}>
               {origen}
+            </option>
+          ))}
+        </select>
+      </Campo>
+
+      <Campo label="Estado">
+        <select name="estado" defaultValue={candidato?.estado ?? ""} className="campo">
+          <option value="">—</option>
+          {ESTADOS_CANDIDATO.map((estado) => (
+            <option key={estado} value={estado}>
+              {estado}
             </option>
           ))}
         </select>

@@ -146,15 +146,23 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
   - En el tablero de vacantes y el de postulaciones, ahora se puede
     hacer click en el título/nombre de cada tarjeta para ir directo a
     su ficha (antes solo se podía arrastrar).
-  - El candidato tiene su propio indicador de **Estado** (visible en
-    el listado y en su ficha), tomado de la postulación más reciente
-    (status final si el proceso terminó, si no la etapa actual) —
-    un concepto distinto del estado de la vacante.
   - La postulación ahora deja explícito si es **Qualer** o
     **Freelance** (`tipo_candidato`, visible en la ficha del
     candidato, en el tablero y en la lista de postulantes de la
     vacante); si es Freelance, pide además su origen (**Mercado**,
     **Elías** o **Agencia**).
+- **Estado propio del candidato** (migración 0017): el candidato tiene
+  ahora su propio campo **Estado** (`candidatos.estado`), editable
+  directamente desde el formulario de alta/edición con un selector de
+  lista fija (`ESTADOS_CANDIDATO` en `src/lib/types.ts`) — antes se
+  mostraba solo como un dato derivado de la postulación más reciente
+  y no se podía cargar ni cambiar de forma independiente. Es un
+  concepto distinto de la etapa de una postulación puntual y del
+  estado de una vacante. Se agregó también como filtro (selección
+  múltiple) en el listado de candidatos. La columna no tiene check
+  constraint a propósito: la lista de estados probablemente crezca y
+  forzarla en la base obligaría a una migración cada vez que se suma
+  uno nuevo — el control de qué valores existen vive en la app.
 
 El resto de las funcionalidades (Gmail) se
 construyen en las fases siguientes (ver el PRD, sección 6 — Roadmap de
@@ -267,6 +275,12 @@ Después correr también, en orden:
 - `0016_origen_freelance.sql` — agrega `postulaciones.origen_freelance`
   (`Mercado` / `Elías` / `Agencia`, con check constraint), solo tiene
   sentido cuando `tipo_candidato` es `Freelance`.
+- `0017_estado_candidato.sql` — agrega `candidatos.estado` (texto,
+  sin check constraint a propósito — ver más arriba). Hace un backfill
+  desde la `estado_final` de la postulación más reciente de cada
+  candidato, para que el histórico ya cargado no quede vacío. De acá
+  en más se carga y edita directamente desde el formulario del
+  candidato.
 
 ### Carga inicial desde la planilla de reclutamiento
 

@@ -94,6 +94,22 @@ export const ETAPAS_CANDIDATO = [
   "Descartado",
 ] as const;
 
+// Estado propio de la persona (distinto de la etapa de una postulación
+// puntual, y distinto del estado de una vacante). Lista abierta a
+// crecer — no tiene check constraint en la base, se controla acá.
+export const ESTADOS_CANDIDATO = [
+  "Continua en base",
+  "Entrevista",
+  "Contratado",
+  "Hired",
+  "Job Offer rechazada",
+  "Out por salario",
+  "Out por seniority",
+  "Out por fit cultural",
+  "Out por interes",
+] as const;
+export type EstadoCandidato = (typeof ESTADOS_CANDIDATO)[number];
+
 // Datos de la persona. Un candidato puede tener varias postulaciones (una
 // por cada proceso de selección en el que participa, a veces en simultáneo)
 // — ver `Postulacion` más abajo.
@@ -101,6 +117,7 @@ export type Candidato = {
   id: string;
   nombre: string | null;
   nombre_completo: string;
+  estado: EstadoCandidato | null;
   email: string | null;
   telefono: string | null;
   cv_url: string | null;
