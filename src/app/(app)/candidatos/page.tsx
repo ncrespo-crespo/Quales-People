@@ -145,7 +145,7 @@ export default async function CandidatosPage({
               {encabezado("nombre_completo", "Nombre")}
               <th className="px-4 py-2">Estado</th>
               {encabezado("origen", "Origen")}
-              <th className="px-4 py-2">Contacto</th>
+              <th className="px-4 py-2">LinkedIn</th>
               {encabezado("fecha_ingreso", "Fecha de contacto", "desc")}
               <th className="px-4 py-2 text-right">Postulaciones</th>
               <th className="px-4 py-2" />
@@ -171,19 +171,18 @@ export default async function CandidatosPage({
                   {candidato.origen ?? "—"}
                 </td>
                 <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
-                  <div className="flex items-center gap-2">
-                    <span>{[candidato.email, candidato.telefono].filter(Boolean).join(" · ") || "—"}</span>
-                    {candidato.linkedin_url && (
-                      <a
-                        href={candidato.linkedin_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="shrink-0 text-brand-blue hover:underline"
-                      >
-                        LinkedIn
-                      </a>
-                    )}
-                  </div>
+                  {candidato.linkedin_url ? (
+                    <a
+                      href={candidato.linkedin_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-brand-blue hover:underline"
+                    >
+                      LinkedIn
+                    </a>
+                  ) : (
+                    "—"
+                  )}
                 </td>
                 <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
                   {formatearFecha(candidato.fecha_ingreso)}
