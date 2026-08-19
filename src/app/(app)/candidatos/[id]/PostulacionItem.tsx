@@ -388,6 +388,22 @@ function CampoPostulacion({ campo, valor }: { campo: CampoSpec; valor: unknown }
     );
   }
 
+  if (campo.tipo === "go_no_go") {
+    return (
+      <label className="flex flex-col gap-1 text-xs text-zinc-700 dark:text-zinc-300">
+        {campo.label}
+        <select name={nombre} defaultValue={(valor as string) ?? ""} className="campo">
+          <option value="">Sin dato</option>
+          <option value="GO">GO</option>
+          <option value="NO GO">NO GO</option>
+        </select>
+        <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
+          Un NO GO pasa el estado del candidato a &quot;Out por fit cultural&quot;.
+        </span>
+      </label>
+    );
+  }
+
   if (campo.tipo === "booleano") {
     const actual = valor === true ? "true" : valor === false ? "false" : "";
     return (

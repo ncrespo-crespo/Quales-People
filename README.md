@@ -337,6 +337,15 @@ Después correr también, en orden:
   `fuente_importada`. El selector de Origen suma las fuentes reales
   encontradas en la planilla (Mercado, Consultora - Elías, Consultora
   ITiers, Capacitaciones, The Flock) a las opciones que ya tenía.
+- `0022_no_go_hr_out_fit_cultural.sql` — regla del proceso: un "NO GO"
+  en el feedback de la entrevista de HR de una postulación es, en sí
+  mismo, un descarte por fit cultural. Corrige el histórico pasando a
+  "Out por fit cultural" a los candidatos con algún NO GO cargado
+  (61 en la planilla real, sin pisar ningún estado positivo como
+  Hired). De acá en más lo aplica el propio formulario al guardar una
+  postulación con NO GO — no hace falta esperar al status final. El
+  campo "Feedback entrevista HR" pasa de texto libre a un selector
+  GO / NO GO (esos eran los únicos dos valores reales en la planilla).
 
 ### Carga inicial desde la planilla de reclutamiento
 

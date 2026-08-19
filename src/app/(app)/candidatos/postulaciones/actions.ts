@@ -65,6 +65,7 @@ export async function actualizarPostulacion(id: string, candidatoId: string, for
   const etapaAnterior = String(formData.get("etapa_anterior"));
   const etapaNueva = String(formData.get("etapa_actual"));
   const motivoDescarte = valorONulo(formData, "descartado_motivo");
+  const feedbackHr = valorONulo(formData, "feedback_entrevista_hr");
 
   if (etapaNueva === "Descartado" && !motivoDescarte) {
     redirect(
@@ -92,7 +93,7 @@ export async function actualizarPostulacion(id: string, candidatoId: string, for
       fecha_screening_hr: valorONulo(formData, "fecha_screening_hr"),
       fecha_entrevista_hr: valorONulo(formData, "fecha_entrevista_hr"),
       seniority_propuesto_hr: valorONulo(formData, "seniority_propuesto_hr"),
-      feedback_entrevista_hr: valorONulo(formData, "feedback_entrevista_hr"),
+      feedback_entrevista_hr: feedbackHr,
       fecha_entrevista_area: valorONulo(formData, "fecha_entrevista_area"),
       seniority_propuesto_area: valorONulo(formData, "seniority_propuesto_area"),
       feedback_entrevista_area: valorONulo(formData, "feedback_entrevista_area"),
@@ -122,6 +123,16 @@ export async function actualizarPostulacion(id: string, candidatoId: string, for
 
   if (error) {
     redirect(`/candidatos/${candidatoId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  // Regla del proceso: un NO GO en la entrevista de HR es, en sí mismo, un
+  // descarte por fit cultural — se refleja directo en el estado de la
+  // persona sin esperar a que se cargue el status final del proceso.
+  if (feedbackHr === "NO GO") {
+    await supabase
+      .from("candidatos")
+      .update({ estado: "Out por fit cultural" })
+      .eq("id", candidatoId);
   }
 
   if (etapaAnterior !== etapaNueva) {

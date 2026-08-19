@@ -3,7 +3,7 @@ import type { Postulacion } from "@/lib/types";
 export type CampoSpec = {
   name: keyof Postulacion;
   label: string;
-  tipo?: "fecha" | "fecha_hora" | "textarea" | "booleano";
+  tipo?: "fecha" | "fecha_hora" | "textarea" | "booleano" | "go_no_go";
 };
 
 export const GRUPOS: { titulo: string; campos: CampoSpec[] }[] = [
@@ -14,7 +14,7 @@ export const GRUPOS: { titulo: string; campos: CampoSpec[] }[] = [
       { name: "fecha_screening_hr", label: "Fecha screening HR", tipo: "fecha" },
       { name: "fecha_entrevista_hr", label: "Fecha entrevista HR", tipo: "fecha" },
       { name: "seniority_propuesto_hr", label: "Seniority propuesto (HR)" },
-      { name: "feedback_entrevista_hr", label: "Feedback entrevista HR", tipo: "textarea" },
+      { name: "feedback_entrevista_hr", label: "Feedback entrevista HR", tipo: "go_no_go" },
       { name: "fecha_entrevista_area", label: "Fecha entrevista área", tipo: "fecha" },
       { name: "seniority_propuesto_area", label: "Seniority propuesto (área)" },
       { name: "feedback_entrevista_area", label: "Feedback entrevista área", tipo: "textarea" },
