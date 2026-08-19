@@ -151,6 +151,20 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
     candidato, en el tablero y en la lista de postulantes de la
     vacante); si es Freelance, pide además su origen (**Mercado**,
     **Elías** o **Agencia**).
+- El selector de **año** (Overview, `/vacantes`, `/candidatos`) pasa a
+  ser de selección múltiple, igual que el resto de los filtros — se
+  puede ver más de un año a la vez. Sin ningún año elegido en la URL
+  sigue mostrando el año por defecto (nunca "ningún año", no tendría
+  sentido para estas pantallas); `Seleccionar todo` lleva los 4 años
+  disponibles.
+- Todos los filtros de selección múltiple (`FiltroMultiple` y el
+  selector de año) suman una opción de `Seleccionar todo` / `Ninguno`
+  arriba de la lista de opciones, para no tener que tildar una por una.
+- En el listado de `/candidatos`, la columna "Postulaciones" pasa de
+  mostrar solo la cantidad a mostrar un link directo a la vacante de
+  la postulación más reciente del candidato (si tiene más de una, se
+  ve un "+N" al lado para las anteriores). El total siempre se puede
+  ver completo en la ficha del candidato ("N postulaciones").
 - **Estado propio del candidato** (migración 0017): el candidato tiene
   ahora su propio campo **Estado** (`candidatos.estado`), editable
   directamente desde el formulario de alta/edición con un selector de

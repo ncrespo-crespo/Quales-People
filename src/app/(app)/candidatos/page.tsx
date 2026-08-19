@@ -2,10 +2,11 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Candidato, Postulacion, Vacante } from "@/lib/types";
 import { ANIO_POR_DEFECTO, ESTADOS_CANDIDATO } from "@/lib/types";
-import { rangoAnio } from "@/lib/fechas";
+import { filtroPorAnios } from "@/lib/fechas";
 import { EncabezadoOrdenable } from "@/components/EncabezadoOrdenable";
 import { FiltroAnio } from "@/components/FiltroAnio";
 import { Paginacion, TAMANIO_PAGINA } from "@/components/Paginacion";
+import { etiquetaVacante } from "@/lib/vacantes";
 import { FiltrosPersonas } from "./FiltrosPersonas";
 import { alternarOcultoCandidato } from "./actions";
 
@@ -38,14 +39,15 @@ export default async function CandidatosPage({
 }) {
   const resueltos = await searchParams;
   const { q, origen, estado, ocultos, vacante, provincia, ingles, stack } = resueltos;
-  const anio = Number(resueltos.anio) || ANIO_POR_DEFECTO;
+  const anios = resueltos.anio
+    ? resueltos.anio.split(",").map(Number).filter((n) => !Number.isNaN(n))
+    : [ANIO_POR_DEFECTO];
   const sort = resueltos.sort && COLUMNAS_ORDENABLES.has(resueltos.sort)
     ? resueltos.sort
     : "fecha_ingreso";
   const dir = resueltos.dir === "asc" ? "asc" : "desc";
   const pagina = Math.max(1, Number(resueltos.pagina) || 1);
   const supabase = await createClient();
-  const { desde, hasta } = rangoAnio(anio);
 
   let idsPorVacante: string[] | null = null;
   if (vacante) {
@@ -59,8 +61,7 @@ export default async function CandidatosPage({
   let consulta = supabase
     .from("candidatos")
     .select("*", { count: "exact" })
-    .gte("fecha_ingreso", desde)
-    .lt("fecha_ingreso", hasta)
+    .or(filtroPorAnios("fecha_ingreso", anios))
     .order(sort, { ascending: dir === "asc", nullsFirst: false });
   if (!ocultos) consulta = consulta.eq("oculto", false);
   if (q) consulta = consulta.ilike("nombre_completo", `%${q}%`);
@@ -77,8 +78,9 @@ export default async function CandidatosPage({
       consulta.returns<Candidato[]>(),
       supabase
         .from("postulaciones")
-        .select("id, candidato_id")
-        .returns<Pick<Postulacion, "id" | "candidato_id">[]>(),
+        .select("id, candidato_id, vacante_id, fecha_postulacion")
+        .order("fecha_postulacion", { ascending: false })
+        .returns<Pick<Postulacion, "id" | "candidato_id" | "vacante_id" | "fecha_postulacion">[]>(),
       supabase.from("vacantes").select("*").returns<Vacante[]>(),
       supabase
         .from("candidatos")
@@ -86,10 +88,17 @@ export default async function CandidatosPage({
         .returns<{ provincia_estado: string | null; nivel_ingles: string | null }[]>(),
     ]);
 
+  // Ordenadas por fecha_postulacion desc: la primera que aparece por
+  // candidato es su postulación más reciente.
   const postulacionesPorCandidato = new Map<string, number>();
+  const ultimaVacantePorCandidato = new Map<string, string | null>();
   for (const p of postulaciones ?? []) {
     postulacionesPorCandidato.set(p.candidato_id, (postulacionesPorCandidato.get(p.candidato_id) ?? 0) + 1);
+    if (!ultimaVacantePorCandidato.has(p.candidato_id)) {
+      ultimaVacantePorCandidato.set(p.candidato_id, p.vacante_id);
+    }
   }
+  const vacantePorId = new Map((vacantes ?? []).map((v) => [v.id, v]));
 
   const provincias = [...new Set((perfiles ?? []).map((p) => p.provincia_estado).filter((v): v is string => !!v))].sort();
   const nivelesIngles = [...new Set((perfiles ?? []).map((p) => p.nivel_ingles).filter((v): v is string => !!v))].sort();
@@ -140,7 +149,7 @@ export default async function CandidatosPage({
               {encabezado("origen", "Origen")}
               <th className="px-4 py-2">LinkedIn</th>
               {encabezado("fecha_ingreso", "Fecha de contacto", "desc")}
-              <th className="px-4 py-2 text-right">Postulaciones</th>
+              <th className="px-4 py-2">Postulaciones</th>
               <th className="px-4 py-2" />
             </tr>
           </thead>
@@ -180,8 +189,30 @@ export default async function CandidatosPage({
                 <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
                   {formatearFecha(candidato.fecha_ingreso)}
                 </td>
-                <td className="px-4 py-2 text-right text-zinc-600 dark:text-zinc-400">
-                  {postulacionesPorCandidato.get(candidato.id) ?? 0}
+                <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
+                  {(() => {
+                    const total = postulacionesPorCandidato.get(candidato.id) ?? 0;
+                    if (total === 0) return "—";
+                    const ultimaVacanteId = ultimaVacantePorCandidato.get(candidato.id);
+                    const vacante = ultimaVacanteId ? vacantePorId.get(ultimaVacanteId) : undefined;
+                    return (
+                      <span className="flex items-center gap-1.5 whitespace-nowrap">
+                        {vacante ? (
+                          <Link
+                            href={`/vacantes/${vacante.id}`}
+                            className="max-w-48 truncate text-brand-blue hover:underline"
+                          >
+                            {etiquetaVacante(vacante)}
+                          </Link>
+                        ) : (
+                          <span className="text-zinc-500 dark:text-zinc-400">Sin vacante</span>
+                        )}
+                        {total > 1 && (
+                          <span className="text-xs text-zinc-500 dark:text-zinc-400">+{total - 1}</span>
+                        )}
+                      </span>
+                    );
+                  })()}
                 </td>
                 <td className="px-4 py-2 text-right whitespace-nowrap">
                   <form

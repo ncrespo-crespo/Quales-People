@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Equipo, VacanteConMetricas } from "@/lib/types";
 import { ANIO_POR_DEFECTO } from "@/lib/types";
-import { rangoAnio } from "@/lib/fechas";
+import { filtroPorAnios } from "@/lib/fechas";
 import { FiltrosOverview } from "./FiltrosOverview";
 
 function promedio(valores: number[]) {
@@ -15,16 +15,16 @@ export default async function OverviewPage({
   searchParams: Promise<{ anio?: string; reclutador?: string }>;
 }) {
   const { anio: anioParam, reclutador } = await searchParams;
-  const anio = Number(anioParam) || ANIO_POR_DEFECTO;
-  const { desde, hasta } = rangoAnio(anio);
+  const anios = anioParam
+    ? anioParam.split(",").map(Number).filter((n) => !Number.isNaN(n))
+    : [ANIO_POR_DEFECTO];
   const supabase = await createClient();
 
   let consulta = supabase
     .from("vw_metricas_vacantes")
     .select("*")
     .eq("oculto", false)
-    .gte("fecha_inicio_proceso", desde)
-    .lt("fecha_inicio_proceso", hasta);
+    .or(filtroPorAnios("fecha_inicio_proceso", anios));
   if (reclutador) consulta = consulta.in("reclutador_responsable_id", reclutador.split(","));
 
   const [{ data: vacantes }, { data: equipo }] = await Promise.all([
@@ -74,7 +74,7 @@ export default async function OverviewPage({
   return (
     <div className="mx-auto max-w-6xl p-8">
       <h1 className="mb-6 text-xl font-bold text-brand-navy dark:text-white">
-        Overview — Búsquedas {anio}
+        Overview — Búsquedas {anios.join(", ")}
       </h1>
 
       <FiltrosOverview equipo={equipo ?? []} />
@@ -154,7 +154,7 @@ export default async function OverviewPage({
               {porReclutador.size === 0 && (
                 <tr>
                   <td colSpan={4} className="px-4 py-8 text-center text-zinc-500">
-                    Sin datos para {anio}.
+                    Sin datos para {anios.join(", ")}.
                   </td>
                 </tr>
               )}

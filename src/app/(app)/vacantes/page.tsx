@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Equipo, EstadoVacante, VacanteConMetricas } from "@/lib/types";
 import { ANIO_POR_DEFECTO } from "@/lib/types";
-import { rangoAnio } from "@/lib/fechas";
+import { filtroPorAnios } from "@/lib/fechas";
 import { EncabezadoOrdenable } from "@/components/EncabezadoOrdenable";
 import { FiltroAnio } from "@/components/FiltroAnio";
 import { Paginacion, TAMANIO_PAGINA } from "@/components/Paginacion";
@@ -41,20 +41,20 @@ export default async function VacantesPage({
 }) {
   const resueltos = await searchParams;
   const { estado, reclutador, cliente, prioridad, ocultos } = resueltos;
-  const anio = Number(resueltos.anio) || ANIO_POR_DEFECTO;
+  const anios = resueltos.anio
+    ? resueltos.anio.split(",").map(Number).filter((n) => !Number.isNaN(n))
+    : [ANIO_POR_DEFECTO];
   const sort = resueltos.sort && COLUMNAS_ORDENABLES.has(resueltos.sort)
     ? resueltos.sort
     : "fecha_inicio_proceso";
   const dir = resueltos.dir === "asc" ? "asc" : "desc";
   const pagina = Math.max(1, Number(resueltos.pagina) || 1);
   const supabase = await createClient();
-  const { desde, hasta } = rangoAnio(anio);
 
   let consulta = supabase
     .from("vw_metricas_vacantes")
     .select("*", { count: "exact" })
-    .gte("fecha_inicio_proceso", desde)
-    .lt("fecha_inicio_proceso", hasta)
+    .or(filtroPorAnios("fecha_inicio_proceso", anios))
     .order(sort, { ascending: dir === "asc", nullsFirst: false });
   if (estado) consulta = consulta.in("estado_id", estado.split(","));
   if (reclutador) consulta = consulta.in("reclutador_responsable_id", reclutador.split(","));
