@@ -346,6 +346,16 @@ Después correr también, en orden:
   postulación con NO GO — no hace falta esperar al status final. El
   campo "Feedback entrevista HR" pasa de texto libre a un selector
   GO / NO GO (esos eran los únicos dos valores reales en la planilla).
+- `0023_sync_pipeline_agosto.sql` — sincronización puntual (no un cambio
+  de esquema) a partir de una nueva exportación del pipeline, comparada
+  campo por campo contra la carga original (`supabase/seed/0001` y
+  `0002`): 1 candidata nueva (Dalila Gonzalez) y 26 candidatos con el
+  feedback de la entrevista de área completado o actualizado. Las
+  vacantes de "Hiring Plan Services 2026" no tuvieron ningún cambio.
+  El emparejamiento es por nombre (`normalizar_nombre_para_match`); 3
+  nombres duplicados en la base (Lucas Encina, Sebastián/Sebastian
+  Burella, Gabriel Nuñez) no se pudieron emparejar sin ambigüedad y
+  quedan para revisar a mano. Ejecutar una sola vez.
 
 ### Carga inicial desde la planilla de reclutamiento
 
