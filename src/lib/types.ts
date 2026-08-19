@@ -100,7 +100,6 @@ export const ETAPAS_CANDIDATO = [
 export const ESTADOS_CANDIDATO = [
   "Continua en base",
   "Entrevista",
-  "Contratado",
   "Hired",
   "Job Offer rechazada",
   "Out por salario",

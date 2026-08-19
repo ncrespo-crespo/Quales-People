@@ -298,6 +298,11 @@ Después correr también, en orden:
   resultado final), el mismo criterio que ya usaba la importación
   original para esos casos. Se completan con ese valor para que todos
   los candidatos importados queden con un estado cargado.
+- `0020_unificar_contratado_hired.sql` — "Contratado" y "Hired" eran
+  dos valores distintos para el mismo estado final del candidato; se
+  unifican en "Hired" (`ESTADOS_CANDIDATO` ya no incluye "Contratado"
+  como opción propia). No afecta la etapa "Contratado" del pipeline de
+  una postulación (`ETAPAS_CANDIDATO`), que es un concepto distinto.
 
 ### Carga inicial desde la planilla de reclutamiento
 
