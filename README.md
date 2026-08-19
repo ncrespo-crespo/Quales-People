@@ -165,6 +165,10 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
   la postulación más reciente del candidato (si tiene más de una, se
   ve un "+N" al lado para las anteriores). El total siempre se puede
   ver completo en la ficha del candidato ("N postulaciones").
+- Mismo criterio en el listado de `/vacantes`: la columna
+  "Postulantes" muestra el nombre del postulante más reciente (con
+  link a su ficha) en vez de solo la cantidad, con un "+N" al lado si
+  hay más de uno.
 - **Estado propio del candidato** (migración 0017): el candidato tiene
   ahora su propio campo **Estado** (`candidatos.estado`), editable
   directamente desde el formulario de alta/edición con un selector de

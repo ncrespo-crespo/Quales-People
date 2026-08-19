@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import type { Equipo, EstadoVacante, VacanteConMetricas } from "@/lib/types";
+import type { Equipo, EstadoVacante, PostulacionConDias, VacanteConMetricas } from "@/lib/types";
 import { ANIO_POR_DEFECTO } from "@/lib/types";
 import { filtroPorAnios } from "@/lib/fechas";
 import { EncabezadoOrdenable } from "@/components/EncabezadoOrdenable";
@@ -68,14 +68,26 @@ export default async function VacantesPage({
       consulta.returns<VacanteConMetricas[]>(),
       supabase.from("estados_vacante").select("*").order("orden").returns<EstadoVacante[]>(),
       supabase.from("equipo").select("*").returns<Equipo[]>(),
-      supabase.from("postulaciones").select("vacante_id").returns<{ vacante_id: string | null }[]>(),
+      supabase
+        .from("vw_postulaciones_pipeline")
+        .select("vacante_id, candidato_id, nombre_completo, fecha_postulacion")
+        .order("fecha_postulacion", { ascending: false })
+        .returns<
+          Pick<PostulacionConDias, "vacante_id" | "candidato_id" | "nombre_completo" | "fecha_postulacion">[]
+        >(),
     ]);
 
   const nombrePorId = new Map((equipo ?? []).map((p) => [p.id, p.nombre ?? p.email]));
+  // Ordenadas por fecha_postulacion desc: la primera que aparece por
+  // vacante es su postulante más reciente.
   const postulantesPorVacante = new Map<string, number>();
+  const ultimoPostulantePorVacante = new Map<string, { candidatoId: string; nombre: string }>();
   for (const p of postulaciones ?? []) {
     if (!p.vacante_id) continue;
     postulantesPorVacante.set(p.vacante_id, (postulantesPorVacante.get(p.vacante_id) ?? 0) + 1);
+    if (!ultimoPostulantePorVacante.has(p.vacante_id)) {
+      ultimoPostulantePorVacante.set(p.vacante_id, { candidatoId: p.candidato_id, nombre: p.nombre_completo });
+    }
   }
   const totalPaginas = Math.max(1, Math.ceil((totalVacantes ?? 0) / TAMANIO_PAGINA));
   const encabezado = (campo: string, etiqueta: string, ordenPorDefecto?: "asc" | "desc") => (
@@ -125,7 +137,7 @@ export default async function VacantesPage({
               <th className="px-4 py-2">Responsable</th>
               {encabezado("fecha_inicio_proceso", "Fecha de inicio", "desc")}
               {encabezado("dias_open", "Días open / TTF", "desc")}
-              <th className="px-4 py-2 text-right">Postulantes</th>
+              <th className="px-4 py-2">Postulantes</th>
               <th className="px-4 py-2" />
             </tr>
           </thead>
@@ -176,8 +188,29 @@ export default async function VacantesPage({
                     {esCritico(vacante.dias_open) && <InsigniaCritico />}
                   </div>
                 </td>
-                <td className="px-4 py-2 text-right text-zinc-600 dark:text-zinc-400">
-                  {postulantesPorVacante.get(vacante.id) ?? 0}
+                <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
+                  {(() => {
+                    const total = postulantesPorVacante.get(vacante.id) ?? 0;
+                    if (total === 0) return "—";
+                    const ultimo = ultimoPostulantePorVacante.get(vacante.id);
+                    return (
+                      <span className="flex items-center gap-1.5 whitespace-nowrap">
+                        {ultimo ? (
+                          <Link
+                            href={`/candidatos/${ultimo.candidatoId}`}
+                            className="max-w-48 truncate text-brand-blue hover:underline"
+                          >
+                            {ultimo.nombre}
+                          </Link>
+                        ) : (
+                          "—"
+                        )}
+                        {total > 1 && (
+                          <span className="text-xs text-zinc-500 dark:text-zinc-400">+{total - 1}</span>
+                        )}
+                      </span>
+                    );
+                  })()}
                 </td>
                 <td className="px-4 py-2 text-right whitespace-nowrap">
                   {vacante.drive_url && (
