@@ -281,6 +281,16 @@ Después correr también, en orden:
   candidato, para que el histórico ya cargado no quede vacío. De acá
   en más se carga y edita directamente desde el formulario del
   candidato.
+- `0018_fecha_contacto_desde_screening.sql` — corrige
+  `candidatos.fecha_ingreso` ("Fecha de contacto" en la UI): en la
+  importación original (migración 0009) había quedado cargada desde
+  "Fecha Primer Contacto" de la planilla, pero el dato correcto es
+  "Fecha screening HR" del pipeline. Se corrige tomando el
+  `fecha_screening_hr` de la primera postulación de cada candidato
+  (solo cuando existe — a los candidatos sin ese dato no los toca).
+  Validado contra Postgres local con los datos reales de la planilla:
+  229 de 264 candidatos tenían screening HR cargado y se corrigieron
+  sin dejar ningún desajuste.
 
 ### Carga inicial desde la planilla de reclutamiento
 
