@@ -46,6 +46,7 @@ export function FiltroMultiple({
     } else {
       params.delete(campo);
     }
+    params.delete("pagina");
     router.push(`${basePath}?${params.toString()}`);
   }
 

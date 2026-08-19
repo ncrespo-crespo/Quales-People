@@ -81,6 +81,10 @@ export async function actualizarPostulacion(id: string, candidatoId: string, for
       descartado_motivo: etapaNueva === "Descartado" ? motivoDescarte : null,
       // proceso de selección
       tipo_candidato: valorONulo(formData, "tipo_candidato"),
+      origen_freelance:
+        valorONulo(formData, "tipo_candidato") === "Freelance"
+          ? valorONulo(formData, "origen_freelance")
+          : null,
       disponibilidad_ingreso: valorONulo(formData, "disponibilidad_ingreso"),
       expectativa_salarial: valorONulo(formData, "expectativa_salarial"),
       tipo_moneda: valorONulo(formData, "tipo_moneda"),

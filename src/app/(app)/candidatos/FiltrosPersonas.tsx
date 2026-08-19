@@ -25,6 +25,7 @@ export function FiltrosPersonas({
     } else {
       params.delete(campo);
     }
+    params.delete("pagina");
     router.push(`/candidatos?${params.toString()}`);
   }
 

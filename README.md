@@ -135,6 +135,26 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
   (selector: Qualer/Manpower/Freelance/Talento Tech) y **Hiring
   Manager**, y **País** pasa a mostrarse como campo propio (separado de
   provincia/localidad) tanto en la vacante como en el candidato.
+- Refresh de estilo y navegación (migración 0016):
+  - Los listados de `/candidatos` y `/vacantes` muestran 20 resultados
+    por página, con paginación al pie (cambiar cualquier filtro, orden
+    o año vuelve a la página 1 para no quedar en una página vacía).
+  - Reordenamiento de columnas: **Estado** (de la persona/vacante) pasa
+    a estar junto al nombre/título en vez de al final, para verlo de
+    un vistazo; las columnas numéricas quedan alineadas a la derecha;
+    filas con hover para ubicarse mejor en tablas largas.
+  - En el tablero de vacantes y el de postulaciones, ahora se puede
+    hacer click en el título/nombre de cada tarjeta para ir directo a
+    su ficha (antes solo se podía arrastrar).
+  - El candidato tiene su propio indicador de **Estado** (visible en
+    el listado y en su ficha), tomado de la postulación más reciente
+    (status final si el proceso terminó, si no la etapa actual) —
+    un concepto distinto del estado de la vacante.
+  - La postulación ahora deja explícito si es **Qualer** o
+    **Freelance** (`tipo_candidato`, visible en la ficha del
+    candidato, en el tablero y en la lista de postulantes de la
+    vacante); si es Freelance, pide además su origen (**Mercado**,
+    **Elías** o **Agencia**).
 
 El resto de las funcionalidades (Gmail) se
 construyen en las fases siguientes (ver el PRD, sección 6 — Roadmap de
@@ -244,6 +264,9 @@ Después correr también, en orden:
   vacante. A diferencia de la 0014, acá la columna original no se
   borra — solo se pidió vincular. Los que no se puedan emparejar se
   avisan por NOTICE para vincular a mano desde la ficha del candidato.
+- `0016_origen_freelance.sql` — agrega `postulaciones.origen_freelance`
+  (`Mercado` / `Elías` / `Agencia`, con check constraint), solo tiene
+  sentido cuando `tipo_candidato` es `Freelance`.
 
 ### Carga inicial desde la planilla de reclutamiento
 

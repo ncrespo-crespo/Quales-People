@@ -158,6 +158,12 @@ export default async function FichaVacantePage({
               <span className="rounded-full bg-black/5 px-2 py-0.5 text-xs dark:bg-white/10">
                 {p.etapa_actual}
               </span>
+              {p.tipo_candidato && (
+                <span className="rounded-full bg-brand-blue/10 px-2 py-0.5 text-xs text-brand-blue dark:bg-brand-blue/20">
+                  {p.tipo_candidato}
+                  {p.tipo_candidato === "Freelance" && p.origen_freelance ? ` · ${p.origen_freelance}` : ""}
+                </span>
+              )}
               <span className="text-xs text-zinc-500 dark:text-zinc-400">
                 {p.reclutador_asignado_id
                   ? nombrePorId.get(p.reclutador_asignado_id)

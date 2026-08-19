@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import {
   DndContext,
@@ -137,7 +138,13 @@ function Tarjeta({
       }`}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="font-medium text-black dark:text-zinc-50">{vacante.titulo}</p>
+        <Link
+          href={`/vacantes/${vacante.id}`}
+          onPointerDown={(e) => e.stopPropagation()}
+          className="font-medium text-black hover:underline dark:text-zinc-50"
+        >
+          {vacante.titulo}
+        </Link>
         <InsigniaPrioridad prioridad={vacante.prioridad} />
       </div>
       {vacante.cliente_o_area && (

@@ -5,6 +5,7 @@ import { ANIO_POR_DEFECTO } from "@/lib/types";
 import { rangoAnio } from "@/lib/fechas";
 import { EncabezadoOrdenable } from "@/components/EncabezadoOrdenable";
 import { FiltroAnio } from "@/components/FiltroAnio";
+import { Paginacion, TAMANIO_PAGINA } from "@/components/Paginacion";
 import { FiltrosPersonas } from "./FiltrosPersonas";
 import { alternarOcultoCandidato } from "./actions";
 
@@ -31,6 +32,7 @@ export default async function CandidatosPage({
     stack?: string;
     sort?: string;
     dir?: string;
+    pagina?: string;
   }>;
 }) {
   const resueltos = await searchParams;
@@ -40,6 +42,7 @@ export default async function CandidatosPage({
     ? resueltos.sort
     : "fecha_ingreso";
   const dir = resueltos.dir === "asc" ? "asc" : "desc";
+  const pagina = Math.max(1, Number(resueltos.pagina) || 1);
   const supabase = await createClient();
   const { desde, hasta } = rangoAnio(anio);
 
@@ -54,7 +57,7 @@ export default async function CandidatosPage({
 
   let consulta = supabase
     .from("candidatos")
-    .select("*")
+    .select("*", { count: "exact" })
     .gte("fecha_ingreso", desde)
     .lt("fecha_ingreso", hasta)
     .order(sort, { ascending: dir === "asc", nullsFirst: false });
@@ -65,8 +68,9 @@ export default async function CandidatosPage({
   if (ingles) consulta = consulta.in("nivel_ingles", ingles.split(","));
   if (stack) consulta = consulta.ilike("stack_principal", `%${stack}%`);
   if (idsPorVacante) consulta = consulta.in("id", idsPorVacante.length ? idsPorVacante : [ID_INEXISTENTE]);
+  consulta = consulta.range((pagina - 1) * TAMANIO_PAGINA, pagina * TAMANIO_PAGINA - 1);
 
-  const [{ data: candidatos }, { data: postulaciones }, { data: vacantes }, { data: perfiles }] =
+  const [{ data: candidatos, count: totalCandidatos }, { data: postulaciones }, { data: vacantes }, { data: perfiles }] =
     await Promise.all([
       consulta.returns<Candidato[]>(),
       supabase
@@ -96,6 +100,7 @@ export default async function CandidatosPage({
 
   const provincias = [...new Set((perfiles ?? []).map((p) => p.provincia_estado).filter((v): v is string => !!v))].sort();
   const nivelesIngles = [...new Set((perfiles ?? []).map((p) => p.nivel_ingles).filter((v): v is string => !!v))].sort();
+  const totalPaginas = Math.max(1, Math.ceil((totalCandidatos ?? 0) / TAMANIO_PAGINA));
 
   const encabezado = (campo: string, etiqueta: string, ordenPorDefecto?: "asc" | "desc") => (
     <EncabezadoOrdenable
@@ -129,17 +134,20 @@ export default async function CandidatosPage({
         <FiltrosPersonas vacantes={vacantes ?? []} provincias={provincias} nivelesIngles={nivelesIngles} />
       </div>
 
+      <p className="mb-2 text-xs text-zinc-500 dark:text-zinc-400">
+        {totalCandidatos ?? 0} candidato{(totalCandidatos ?? 0) === 1 ? "" : "s"}
+      </p>
+
       <div className="overflow-x-auto rounded border border-black/10 dark:border-white/10">
         <table className="w-full text-left text-sm">
           <thead className="bg-black/5 text-zinc-600 dark:bg-white/5 dark:text-zinc-400">
             <tr>
               {encabezado("nombre_completo", "Nombre")}
-              <th className="px-4 py-2">Contacto</th>
-              {encabezado("origen", "Origen")}
-              {encabezado("fecha_ingreso", "Fecha de contacto", "desc")}
               <th className="px-4 py-2">Estado</th>
-              <th className="px-4 py-2">Postulaciones</th>
-              <th className="px-4 py-2">LinkedIn</th>
+              {encabezado("origen", "Origen")}
+              <th className="px-4 py-2">Contacto</th>
+              {encabezado("fecha_ingreso", "Fecha de contacto", "desc")}
+              <th className="px-4 py-2 text-right">Postulaciones</th>
               <th className="px-4 py-2" />
             </tr>
           </thead>
@@ -147,7 +155,7 @@ export default async function CandidatosPage({
             {(candidatos ?? []).map((candidato) => (
               <tr
                 key={candidato.id}
-                className={`border-t border-black/10 dark:border-white/10 ${
+                className={`border-t border-black/10 hover:bg-black/[0.02] dark:border-white/10 dark:hover:bg-white/[0.02] ${
                   candidato.oculto ? "opacity-50" : ""
                 }`}
               >
@@ -157,33 +165,31 @@ export default async function CandidatosPage({
                   </Link>
                 </td>
                 <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
-                  {[candidato.email, candidato.telefono].filter(Boolean).join(" · ") || "—"}
+                  {estadoPorCandidato.get(candidato.id) ?? "—"}
                 </td>
                 <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
                   {candidato.origen ?? "—"}
                 </td>
+                <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
+                  <div className="flex items-center gap-2">
+                    <span>{[candidato.email, candidato.telefono].filter(Boolean).join(" · ") || "—"}</span>
+                    {candidato.linkedin_url && (
+                      <a
+                        href={candidato.linkedin_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0 text-brand-blue hover:underline"
+                      >
+                        LinkedIn
+                      </a>
+                    )}
+                  </div>
+                </td>
                 <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
                   {formatearFecha(candidato.fecha_ingreso)}
                 </td>
-                <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
-                  {estadoPorCandidato.get(candidato.id) ?? "—"}
-                </td>
-                <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
+                <td className="px-4 py-2 text-right text-zinc-600 dark:text-zinc-400">
                   {postulacionesPorCandidato.get(candidato.id) ?? 0}
-                </td>
-                <td className="px-4 py-2">
-                  {candidato.linkedin_url ? (
-                    <a
-                      href={candidato.linkedin_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-brand-blue hover:underline"
-                    >
-                      Ver perfil
-                    </a>
-                  ) : (
-                    "—"
-                  )}
                 </td>
                 <td className="px-4 py-2 text-right whitespace-nowrap">
                   <form
@@ -202,7 +208,7 @@ export default async function CandidatosPage({
             ))}
             {(candidatos ?? []).length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-zinc-500">
+                <td colSpan={7} className="px-4 py-8 text-center text-zinc-500">
                   Todavía no hay candidatos cargados.
                 </td>
               </tr>
@@ -210,6 +216,8 @@ export default async function CandidatosPage({
           </tbody>
         </table>
       </div>
+
+      <Paginacion pagina={pagina} totalPaginas={totalPaginas} basePath="/candidatos" searchParams={resueltos} />
     </div>
   );
 }

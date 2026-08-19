@@ -10,6 +10,7 @@ export function FiltroAnio({ basePath }: { basePath: string }) {
   function actualizar(valor: string) {
     const params = new URLSearchParams(searchParams.toString());
     params.set("anio", valor);
+    params.delete("pagina");
     router.push(`${basePath}?${params.toString()}`);
   }
 

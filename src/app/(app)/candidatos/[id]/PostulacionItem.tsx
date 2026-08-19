@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
-import { ETAPAS_CANDIDATO } from "@/lib/types";
+import { ETAPAS_CANDIDATO, ORIGENES_FREELANCE, TIPOS_CANDIDATO } from "@/lib/types";
 import type { Equipo, HistorialEtapa, Postulacion, Vacante } from "@/lib/types";
 import { etiquetaVacante } from "@/lib/vacantes";
 import { actualizarPostulacion, eliminarPostulacion } from "../postulaciones/actions";
@@ -61,6 +61,14 @@ export function PostulacionItem({
         <span className="rounded-full bg-black/5 px-2 py-0.5 text-xs dark:bg-white/10">
           {postulacion.etapa_actual}
         </span>
+        {postulacion.tipo_candidato && (
+          <span className="rounded-full bg-brand-blue/10 px-2 py-0.5 text-xs text-brand-blue dark:bg-brand-blue/20">
+            {postulacion.tipo_candidato}
+            {postulacion.tipo_candidato === "Freelance" && postulacion.origen_freelance
+              ? ` · ${postulacion.origen_freelance}`
+              : ""}
+          </span>
+        )}
         <span className="text-xs text-zinc-500 dark:text-zinc-400">
           {formatearFecha(postulacion.fecha_postulacion)}
         </span>
@@ -157,6 +165,10 @@ function VistaPostulacion({
         {postulacion.etapa_actual === "Descartado" && (
           <DatoVista label="Motivo del descarte" valor={postulacion.descartado_motivo} />
         )}
+        <DatoVista label="Tipo de candidato" valor={postulacion.tipo_candidato} />
+        {postulacion.tipo_candidato === "Freelance" && (
+          <DatoVista label="Origen del freelance" valor={postulacion.origen_freelance} />
+        )}
       </dl>
 
       {GRUPOS.map((grupo) => {
@@ -213,6 +225,8 @@ function FormularioEdicion({
   equipo: Equipo[];
   onCancelar: () => void;
 }) {
+  const [tipoCandidato, setTipoCandidato] = useState(postulacion.tipo_candidato ?? "");
+
   return (
     <form
       action={actualizarPostulacion.bind(null, postulacion.id, candidatoId)}
@@ -248,6 +262,37 @@ function FormularioEdicion({
           ))}
         </select>
       </div>
+
+      <div className="flex flex-wrap gap-2">
+        <select
+          name="tipo_candidato"
+          defaultValue={postulacion.tipo_candidato ?? ""}
+          onChange={(e) => setTipoCandidato(e.target.value)}
+          className="campo"
+        >
+          <option value="">Tipo de candidato: sin definir</option>
+          {TIPOS_CANDIDATO.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+        {tipoCandidato === "Freelance" && (
+          <select
+            name="origen_freelance"
+            defaultValue={postulacion.origen_freelance ?? ""}
+            className="campo"
+          >
+            <option value="">Origen del freelance: sin definir</option>
+            {ORIGENES_FREELANCE.map((o) => (
+              <option key={o} value={o}>
+                {o}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+
       <input
         name="descartado_motivo"
         placeholder="Motivo del descarte (obligatorio si la etapa es Descartado)"

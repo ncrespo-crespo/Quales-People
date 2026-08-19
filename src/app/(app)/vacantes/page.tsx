@@ -5,6 +5,7 @@ import { ANIO_POR_DEFECTO } from "@/lib/types";
 import { rangoAnio } from "@/lib/fechas";
 import { EncabezadoOrdenable } from "@/components/EncabezadoOrdenable";
 import { FiltroAnio } from "@/components/FiltroAnio";
+import { Paginacion, TAMANIO_PAGINA } from "@/components/Paginacion";
 import { FiltrosVacantes } from "./FiltrosVacantes";
 import { alternarOcultoVacante } from "./actions";
 import { esCritico, InsigniaCritico, InsigniaPrioridad } from "./insignias";
@@ -35,6 +36,7 @@ export default async function VacantesPage({
     anio?: string;
     sort?: string;
     dir?: string;
+    pagina?: string;
   }>;
 }) {
   const resueltos = await searchParams;
@@ -44,12 +46,13 @@ export default async function VacantesPage({
     ? resueltos.sort
     : "fecha_inicio_proceso";
   const dir = resueltos.dir === "asc" ? "asc" : "desc";
+  const pagina = Math.max(1, Number(resueltos.pagina) || 1);
   const supabase = await createClient();
   const { desde, hasta } = rangoAnio(anio);
 
   let consulta = supabase
     .from("vw_metricas_vacantes")
-    .select("*")
+    .select("*", { count: "exact" })
     .gte("fecha_inicio_proceso", desde)
     .lt("fecha_inicio_proceso", hasta)
     .order(sort, { ascending: dir === "asc", nullsFirst: false });
@@ -58,8 +61,9 @@ export default async function VacantesPage({
   if (cliente) consulta = consulta.ilike("cliente_o_area", `%${cliente}%`);
   if (prioridad) consulta = consulta.in("prioridad", prioridad.split(","));
   if (!ocultos) consulta = consulta.eq("oculto", false);
+  consulta = consulta.range((pagina - 1) * TAMANIO_PAGINA, pagina * TAMANIO_PAGINA - 1);
 
-  const [{ data: vacantes }, { data: estados }, { data: equipo }, { data: postulaciones }] =
+  const [{ data: vacantes, count: totalVacantes }, { data: estados }, { data: equipo }, { data: postulaciones }] =
     await Promise.all([
       consulta.returns<VacanteConMetricas[]>(),
       supabase.from("estados_vacante").select("*").order("orden").returns<EstadoVacante[]>(),
@@ -73,6 +77,7 @@ export default async function VacantesPage({
     if (!p.vacante_id) continue;
     postulantesPorVacante.set(p.vacante_id, (postulantesPorVacante.get(p.vacante_id) ?? 0) + 1);
   }
+  const totalPaginas = Math.max(1, Math.ceil((totalVacantes ?? 0) / TAMANIO_PAGINA));
   const encabezado = (campo: string, etiqueta: string, ordenPorDefecto?: "asc" | "desc") => (
     <EncabezadoOrdenable
       campo={campo}
@@ -105,18 +110,22 @@ export default async function VacantesPage({
         <FiltrosVacantes estados={estados ?? []} equipo={equipo ?? []} />
       </div>
 
+      <p className="mb-2 text-xs text-zinc-500 dark:text-zinc-400">
+        {totalVacantes ?? 0} vacante{(totalVacantes ?? 0) === 1 ? "" : "s"}
+      </p>
+
       <div className="overflow-x-auto rounded border border-black/10 dark:border-white/10">
         <table className="w-full text-left text-sm">
           <thead className="bg-black/5 text-zinc-600 dark:bg-white/5 dark:text-zinc-400">
             <tr>
               {encabezado("titulo", "Título")}
-              {encabezado("cliente_o_area", "Cliente / área")}
-              {encabezado("fecha_inicio_proceso", "Fecha de inicio", "desc")}
               {encabezado("estado_nombre", "Estado")}
               {encabezado("prioridad", "Prioridad")}
+              {encabezado("cliente_o_area", "Cliente / área")}
               <th className="px-4 py-2">Responsable</th>
+              {encabezado("fecha_inicio_proceso", "Fecha de inicio", "desc")}
               {encabezado("dias_open", "Días open / TTF", "desc")}
-              <th className="px-4 py-2">Postulantes</th>
+              <th className="px-4 py-2 text-right">Postulantes</th>
               <th className="px-4 py-2" />
             </tr>
           </thead>
@@ -124,7 +133,7 @@ export default async function VacantesPage({
             {(vacantes ?? []).map((vacante) => (
               <tr
                 key={vacante.id}
-                className={`border-t border-black/10 dark:border-white/10 ${
+                className={`border-t border-black/10 hover:bg-black/[0.02] dark:border-white/10 dark:hover:bg-white/[0.02] ${
                   vacante.oculto ? "opacity-50" : ""
                 }`}
               >
@@ -132,12 +141,6 @@ export default async function VacantesPage({
                   <Link href={`/vacantes/${vacante.id}`} className="hover:underline">
                     {vacante.titulo}
                   </Link>
-                </td>
-                <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
-                  {vacante.cliente_o_area ?? "—"}
-                </td>
-                <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
-                  {formatearFecha(vacante.fecha_inicio_proceso)}
                 </td>
                 <td className="px-4 py-2">
                   <span
@@ -151,9 +154,15 @@ export default async function VacantesPage({
                   <InsigniaPrioridad prioridad={vacante.prioridad} />
                 </td>
                 <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
+                  {vacante.cliente_o_area ?? "—"}
+                </td>
+                <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
                   {vacante.reclutador_responsable_id
                     ? (nombrePorId.get(vacante.reclutador_responsable_id) ?? "—")
                     : "—"}
+                </td>
+                <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
+                  {formatearFecha(vacante.fecha_inicio_proceso)}
                 </td>
                 <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
                   <div className="flex items-center gap-2">
@@ -167,7 +176,7 @@ export default async function VacantesPage({
                     {esCritico(vacante.dias_open) && <InsigniaCritico />}
                   </div>
                 </td>
-                <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
+                <td className="px-4 py-2 text-right text-zinc-600 dark:text-zinc-400">
                   {postulantesPorVacante.get(vacante.id) ?? 0}
                 </td>
                 <td className="px-4 py-2 text-right whitespace-nowrap">
@@ -205,6 +214,8 @@ export default async function VacantesPage({
           </tbody>
         </table>
       </div>
+
+      <Paginacion pagina={pagina} totalPaginas={totalPaginas} basePath="/vacantes" searchParams={resueltos} />
     </div>
   );
 }

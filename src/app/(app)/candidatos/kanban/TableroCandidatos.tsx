@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import {
   DndContext,
@@ -186,7 +187,20 @@ function Tarjeta({
         isDragging ? "opacity-50" : ""
       }`}
     >
-      <p className="font-medium text-black dark:text-zinc-50">{postulacion.nombre_completo}</p>
+      <div className="flex items-start justify-between gap-2">
+        <Link
+          href={`/candidatos/${postulacion.candidato_id}`}
+          onPointerDown={(e) => e.stopPropagation()}
+          className="font-medium text-black hover:underline dark:text-zinc-50"
+        >
+          {postulacion.nombre_completo}
+        </Link>
+        {postulacion.tipo_candidato && (
+          <span className="shrink-0 rounded-full bg-brand-blue/10 px-1.5 py-0.5 text-[10px] text-brand-blue dark:bg-brand-blue/20">
+            {postulacion.tipo_candidato}
+          </span>
+        )}
+      </div>
       <div className="mt-1 flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
         <span>
           {postulacion.reclutador_asignado_id

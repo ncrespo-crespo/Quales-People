@@ -22,6 +22,7 @@ export function FiltrosVacantes({
     } else {
       params.delete(campo);
     }
+    params.delete("pagina");
     router.push(`/vacantes?${params.toString()}`);
   }
 

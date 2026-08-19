@@ -19,7 +19,7 @@ export function EncabezadoOrdenable({
 
   const params = new URLSearchParams();
   for (const [clave, valor] of Object.entries(searchParams)) {
-    if (valor !== undefined && clave !== "sort" && clave !== "dir") {
+    if (valor !== undefined && clave !== "sort" && clave !== "dir" && clave !== "pagina") {
       params.set(clave, valor);
     }
   }

@@ -99,13 +99,28 @@ export default async function FichaCandidatoPage({
     urlCv = data?.signedUrl ?? null;
   }
 
+  // El estado del candidato es el de su postulación más reciente (ya
+  // vienen ordenadas por fecha_postulacion desc) — status final si el
+  // proceso terminó, si no la etapa en la que está. Es un concepto
+  // distinto del estado de la vacante (Stand By, Hired, etc.).
+  const estadoCandidato = postulaciones?.[0]
+    ? (postulaciones[0].estado_final ?? postulaciones[0].etapa_actual)
+    : null;
+
   return (
     <div className="mx-auto max-w-3xl p-8">
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-bold text-brand-navy dark:text-white">
-            {candidato.nombre_completo}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold text-brand-navy dark:text-white">
+              {candidato.nombre_completo}
+            </h1>
+            {estadoCandidato && (
+              <span className="rounded-full bg-black/5 px-2 py-1 text-xs font-medium text-zinc-700 dark:bg-white/10 dark:text-zinc-300">
+                {estadoCandidato}
+              </span>
+            )}
+          </div>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             {(postulaciones ?? []).length} postulación
             {(postulaciones ?? []).length === 1 ? "" : "es"}

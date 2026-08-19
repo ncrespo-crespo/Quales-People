@@ -138,6 +138,14 @@ export type CandidatoPerfil = {
 
 export type CandidatoCompleto = Candidato & CandidatoPerfil;
 
+// Valores reales encontrados en la carga histórica (candidatos.tipo_candidato).
+export const TIPOS_CANDIDATO = ["Qualer", "Freelance"] as const;
+export type TipoCandidato = (typeof TIPOS_CANDIDATO)[number];
+
+// Solo aplica cuando tipo_candidato es "Freelance".
+export const ORIGENES_FREELANCE = ["Mercado", "Elías", "Agencia"] as const;
+export type OrigenFreelance = (typeof ORIGENES_FREELANCE)[number];
+
 // La relación candidato <-> vacante: un candidato puede tener más de una
 // postulación (a la misma vacante no, pero sí a varias en paralelo o a lo
 // largo del tiempo), cada una con su propia etapa e historial. vacante_id
@@ -152,7 +160,8 @@ export type Postulacion = {
   descartado_motivo: string | null;
   fecha_postulacion: string;
   // proceso de selección
-  tipo_candidato: string | null;
+  tipo_candidato: TipoCandidato | null;
+  origen_freelance: OrigenFreelance | null;
   disponibilidad_ingreso: string | null;
   expectativa_salarial: string | null;
   tipo_moneda: string | null;

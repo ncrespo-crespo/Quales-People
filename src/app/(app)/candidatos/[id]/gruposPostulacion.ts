@@ -10,7 +10,6 @@ export const GRUPOS: { titulo: string; campos: CampoSpec[] }[] = [
   {
     titulo: "Proceso de selección",
     campos: [
-      { name: "tipo_candidato", label: "Tipo de candidato" },
       { name: "fecha_primer_contacto", label: "Fecha primer contacto", tipo: "fecha" },
       { name: "fecha_screening_hr", label: "Fecha screening HR", tipo: "fecha" },
       { name: "fecha_entrevista_hr", label: "Fecha entrevista HR", tipo: "fecha" },
