@@ -169,6 +169,11 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
   "Postulantes" muestra el nombre del postulante más reciente (con
   link a su ficha) en vez de solo la cantidad, con un "+N" al lado si
   hay más de uno.
+- El selector de vacante al agregar una postulación (alta de
+  candidato, "+ Agregar otra postulación" en la ficha, y el select
+  para vincular manualmente una postulación existente a su vacante)
+  ahora ordena por fecha de inicio de proceso más reciente primero,
+  para no tener que buscar entre búsquedas viejas.
 - **Estado propio del candidato** (migración 0017): el candidato tiene
   ahora su propio campo **Estado** (`candidatos.estado`), editable
   directamente desde el formulario de alta/edición con un selector de

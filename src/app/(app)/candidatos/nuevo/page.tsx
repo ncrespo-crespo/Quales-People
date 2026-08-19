@@ -12,7 +12,11 @@ export default async function NuevoCandidatoPage({
   const supabase = await createClient();
 
   const [{ data: vacantes }, { data: equipo }] = await Promise.all([
-    supabase.from("vacantes").select("*").returns<Vacante[]>(),
+    supabase
+      .from("vacantes")
+      .select("*")
+      .order("fecha_inicio_proceso", { ascending: false })
+      .returns<Vacante[]>(),
     supabase.from("equipo").select("*").eq("activo", true).returns<Equipo[]>(),
   ]);
 

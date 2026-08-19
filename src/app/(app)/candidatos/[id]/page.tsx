@@ -69,7 +69,11 @@ export default async function FichaCandidatoPage({
       .order("fecha", { ascending: false })
       .returns<Comunicacion[]>(),
     supabase.from("equipo").select("*").returns<Equipo[]>(),
-    supabase.from("vacantes").select("*").returns<Vacante[]>(),
+    supabase
+      .from("vacantes")
+      .select("*")
+      .order("fecha_inicio_proceso", { ascending: false })
+      .returns<Vacante[]>(),
   ]);
 
   if (!candidato) {
