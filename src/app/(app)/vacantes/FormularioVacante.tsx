@@ -1,5 +1,5 @@
 import type { Equipo, EstadoVacante, Vacante } from "@/lib/types";
-import { MODALIDADES_TRABAJO, MONEDAS, PRIORIDADES_VACANTE } from "@/lib/types";
+import { MODALIDADES_TRABAJO, MONEDAS, PRIORIDADES_VACANTE, TIPOS_OPORTUNIDAD } from "@/lib/types";
 
 export function FormularioVacante({
   action,
@@ -86,6 +86,29 @@ export function FormularioVacante({
           {equipo.map((persona) => (
             <option key={persona.id} value={persona.id}>
               {persona.nombre ?? persona.email}
+            </option>
+          ))}
+        </select>
+      </Campo>
+
+      <Campo label="Hiring Manager">
+        <input
+          name="hiring_manager_nombre"
+          defaultValue={vacante?.hiring_manager_nombre ?? ""}
+          className="campo"
+        />
+      </Campo>
+
+      <Campo label="Tipo de oportunidad">
+        <select
+          name="tipo_oportunidad"
+          defaultValue={vacante?.tipo_oportunidad ?? ""}
+          className="campo"
+        >
+          <option value="">Sin definir</option>
+          {TIPOS_OPORTUNIDAD.map((t) => (
+            <option key={t} value={t}>
+              {t}
             </option>
           ))}
         </select>

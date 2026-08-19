@@ -78,6 +78,8 @@ export default async function FichaVacantePage({
                 : null
             }
           />
+          <Dato label="Hiring Manager" valor={vacante.hiring_manager_nombre} />
+          <Dato label="Tipo de oportunidad" valor={vacante.tipo_oportunidad} />
           <Dato
             label="Días open / TTF"
             valor={
@@ -102,9 +104,10 @@ export default async function FichaVacantePage({
           />
           <Dato label="Stack principal" valor={vacante.stack_principal} />
           <Dato label="Nivel de inglés" valor={vacante.nivel_ingles} />
+          <Dato label="País" valor={vacante.pais} />
           <Dato
-            label="Ubicación"
-            valor={[vacante.localidad, vacante.provincia_estado, vacante.pais].filter(Boolean).join(", ") || null}
+            label="Provincia / localidad"
+            valor={[vacante.localidad, vacante.provincia_estado].filter(Boolean).join(", ") || null}
           />
           <Dato label="Modalidad de trabajo" valor={vacante.modalidad_trabajo} />
           <Dato

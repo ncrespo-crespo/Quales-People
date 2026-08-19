@@ -151,10 +151,9 @@ export default async function FichaCandidatoPage({
           />
           <Dato label="Origen" valor={candidato.origen} />
           <Dato label="Fecha de contacto" valor={formatearFecha(candidato.fecha_ingreso)} />
-          <Dato
-            label="Ubicación"
-            valor={[candidato.localidad, candidato.pais].filter(Boolean).join(", ") || null}
-          />
+          <Dato label="País" valor={candidato.pais} />
+          <Dato label="Provincia / estado" valor={candidato.provincia_estado} />
+          <Dato label="Localidad" valor={candidato.localidad} />
           <Dato label="Área" valor={candidato.area} />
           <Dato
             label="Años de experiencia"
@@ -290,7 +289,6 @@ function Dato({ label, valor }: { label: string; valor: React.ReactNode }) {
 
 function PerfilOtrosDatos({ candidato }: { candidato: CandidatoCompleto }) {
   const campos: [string, React.ReactNode][] = [
-    ["Provincia / estado", candidato.provincia_estado],
     ["Género", candidato.genero],
     ["Formación técnica", candidato.formacion_tecnica],
     ["Lugar de empleo actual", candidato.lugar_empleo_actual],

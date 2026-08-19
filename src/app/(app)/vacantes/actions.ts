@@ -40,6 +40,8 @@ export async function crearVacante(formData: FormData) {
     banda_salarial: valorNumero(formData, "banda_salarial"),
     moneda_banda_salarial: valorONulo(formData, "moneda_banda_salarial"),
     acepta_freelance: valorBooleano(formData, "acepta_freelance"),
+    tipo_oportunidad: valorONulo(formData, "tipo_oportunidad"),
+    hiring_manager_nombre: valorONulo(formData, "hiring_manager_nombre"),
   });
 
   if (error) {
@@ -76,6 +78,8 @@ export async function actualizarVacante(id: string, formData: FormData) {
       banda_salarial: valorNumero(formData, "banda_salarial"),
       moneda_banda_salarial: valorONulo(formData, "moneda_banda_salarial"),
       acepta_freelance: valorBooleano(formData, "acepta_freelance"),
+      tipo_oportunidad: valorONulo(formData, "tipo_oportunidad"),
+      hiring_manager_nombre: valorONulo(formData, "hiring_manager_nombre"),
     })
     .eq("id", id);
 

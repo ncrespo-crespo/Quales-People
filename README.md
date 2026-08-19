@@ -126,6 +126,15 @@ Ver la especificación completa en el PRD del proyecto (documento "ATS Interno
 - Banda salarial (vacante) y remuneración pretendida (candidato) pasan a
   ser un monto con su moneda (`ARS`/`USD`/`EUR`, migración 0013) en vez
   de texto libre, para poder comparar valores más adelante.
+- Limpieza de columnas importadas de la planilla original que quedaban
+  sueltas, sin relación real con el resto de los datos (migraciones
+  0014 y 0015, ver "Base de datos"): el reclutador ahora es siempre la
+  FK real a `equipo` (no texto libre), y las postulaciones históricas
+  quedan vinculadas a su vacante cuando se pudo identificar quién
+  terminó contratado. La vacante también suma **Tipo de oportunidad**
+  (selector: Qualer/Manpower/Freelance/Talento Tech) y **Hiring
+  Manager**, y **País** pasa a mostrarse como campo propio (separado de
+  provincia/localidad) tanto en la vacante como en el candidato.
 
 El resto de las funcionalidades (Gmail) se
 construyen en las fases siguientes (ver el PRD, sección 6 — Roadmap de
@@ -213,6 +222,28 @@ Después correr también, en orden:
   `moneda_remuneracion_pretendida`, `ARS`/`USD`/`EUR` con check
   constraint) — antes no se podían comparar valores ni sabías en qué
   moneda estaba cada uno.
+- `0014_reclutador_desde_importado.sql` — `reclutador_nombre_importado`
+  (texto libre traído de la planilla, migración 0003) se elimina:
+  primero completa `reclutador_responsable_id` (la FK real a `equipo`)
+  buscando cada nombre importado en `equipo.nombre` — por nombre
+  completo y, si no matcheó, por nombre de pila cuando es inequívoco —
+  sin pisar ninguna vacante que ya tuviera un responsable asignado a
+  mano. Cualquier vacante que no se pueda emparejar se avisa por NOTICE
+  en el SQL Editor para asignarla manualmente, y recién después borra la
+  columna. Validado contra Postgres local con los datos reales de la
+  planilla (66 de 66 vacantes con reclutador importado emparejaron).
+- `0015_candidato_ingresado_vinculo.sql` — `candidato_ingresado_nombre`
+  (texto libre, migración 0003, el nombre de quien terminó contratado)
+  no tenía ninguna relación real: ninguna postulación importada traía
+  `vacante_id`. Esta migración arma ese vínculo buscando el candidato
+  por nombre (comparando por conjunto de palabras, sin importar
+  orden/mayúsculas/acentos, porque el texto importado a veces viene
+  "Apellido Nombre" y otras "Nombre Apellido") y asignándole la vacante
+  a su postulación, solo cuando el nombre matchea con un único
+  candidato y ese candidato tiene una única postulación todavía sin
+  vacante. A diferencia de la 0014, acá la columna original no se
+  borra — solo se pidió vincular. Los que no se puedan emparejar se
+  avisan por NOTICE para vincular a mano desde la ficha del candidato.
 
 ### Carga inicial desde la planilla de reclutamiento
 

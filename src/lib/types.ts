@@ -34,6 +34,10 @@ export type ModalidadTrabajo = (typeof MODALIDADES_TRABAJO)[number];
 export const MONEDAS = ["ARS", "USD", "EUR"] as const;
 export type Moneda = (typeof MONEDAS)[number];
 
+// Valores reales encontrados en la carga histórica del Hiring Plan 2026.
+export const TIPOS_OPORTUNIDAD = ["Qualer", "Manpower", "Freelance", "Talento Tech"] as const;
+export type TipoOportunidad = (typeof TIPOS_OPORTUNIDAD)[number];
+
 export type Vacante = {
   id: string;
   titulo: string;
@@ -57,6 +61,8 @@ export type Vacante = {
   banda_salarial: number | null;
   moneda_banda_salarial: Moneda | null;
   acepta_freelance: boolean;
+  tipo_oportunidad: TipoOportunidad | null;
+  hiring_manager_nombre: string | null;
 };
 
 export type VacanteConMetricas = Vacante & {
