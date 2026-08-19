@@ -181,7 +181,6 @@ export async function actualizarCandidato(id: string, formData: FormData) {
         rate_fl: valorONulo(formData, "rate_fl"),
         remuneracion_pretendida: valorNumero(formData, "remuneracion_pretendida"),
         moneda_remuneracion_pretendida: valorONulo(formData, "moneda_remuneracion_pretendida"),
-        fuente_importada: valorONulo(formData, "fuente_importada"),
       })
       .eq("id", id);
 

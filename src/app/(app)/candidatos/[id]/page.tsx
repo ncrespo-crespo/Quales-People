@@ -306,7 +306,6 @@ function PerfilOtrosDatos({ candidato }: { candidato: CandidatoCompleto }) {
         : null,
     ],
     ["Rate freelance", candidato.rate_fl],
-    ["Fuente (importada)", candidato.fuente_importada],
   ];
 
   const tieneDatos = campos.some(([, valor]) => valor !== null && valor !== undefined);

@@ -207,7 +207,6 @@ const CAMPOS_PERFIL: CampoSpec[] = [
   { name: "stack_principal", label: "Stack principal" },
   { name: "lugar_empleo_actual", label: "Lugar de empleo actual" },
   { name: "rate_fl", label: "Rate freelance" },
-  { name: "fuente_importada", label: "Fuente" },
 ];
 
 function SeccionPerfil({ candidato }: { candidato?: CandidatoCompleto }) {

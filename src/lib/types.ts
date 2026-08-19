@@ -74,12 +74,21 @@ export type VacanteConMetricas = Vacante & {
   dif_fip_fic: number | null;
 };
 
+// Los primeros 5 son las opciones originales del selector; el resto son
+// las fuentes reales encontradas en la carga histórica de la planilla
+// (columna "Fuente"), que antes vivían aparte en `fuente_importada` sin
+// relacionarse con el origen del candidato (migración 0021).
 export const ORIGENES_CANDIDATO = [
   "referido",
   "linkedin",
   "base_propia",
   "postulacion",
   "otro",
+  "Mercado",
+  "Consultora - Elías",
+  "Consultora ITiers",
+  "Capacitaciones",
+  "The Flock",
 ] as const;
 
 export type OrigenCandidato = (typeof ORIGENES_CANDIDATO)[number];
@@ -149,7 +158,6 @@ export type CandidatoPerfil = {
   rate_fl: string | null;
   remuneracion_pretendida: number | null;
   moneda_remuneracion_pretendida: Moneda | null;
-  fuente_importada: string | null;
 };
 
 export type CandidatoCompleto = Candidato & CandidatoPerfil;

@@ -303,6 +303,17 @@ Después correr también, en orden:
   unifican en "Hired" (`ESTADOS_CANDIDATO` ya no incluye "Contratado"
   como opción propia). No afecta la etapa "Contratado" del pipeline de
   una postulación (`ETAPAS_CANDIDATO`), que es un concepto distinto.
+- `0021_fuente_como_origen.sql` — "Fuente" (`fuente_importada`, texto
+  libre de la planilla) y "Origen" (`candidatos.origen`, el selector
+  del formulario) eran dos campos separados para el mismo concepto;
+  `origen` nunca se completó en la importación original. Se unifican
+  en `origen`: se copia el valor de `fuente_importada` (normalizando
+  variantes de un mismo origen escritas distinto: "Elias" y
+  "Consultora - Elías" son la misma consultora, "Referid@" es lo mismo
+  que la opción "referido" que ya existía), y se borra la columna
+  `fuente_importada`. El selector de Origen suma las fuentes reales
+  encontradas en la planilla (Mercado, Consultora - Elías, Consultora
+  ITiers, Capacitaciones, The Flock) a las opciones que ya tenía.
 
 ### Carga inicial desde la planilla de reclutamiento
 
