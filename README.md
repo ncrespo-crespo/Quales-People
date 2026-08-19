@@ -291,6 +291,13 @@ Después correr también, en orden:
   Validado contra Postgres local con los datos reales de la planilla:
   229 de 264 candidatos tenían screening HR cargado y se corrigieron
   sin dejar ningún desajuste.
+- `0019_completar_estado_candidato.sql` — el backfill de la 0017 dejaba
+  sin `estado` a los 59 candidatos cuyo "Status Final" venía en blanco
+  en la planilla (ni siquiera "Continua en base"): un blanco ahí
+  significa lo mismo que "Continua en base" (sigue en la base, sin
+  resultado final), el mismo criterio que ya usaba la importación
+  original para esos casos. Se completan con ese valor para que todos
+  los candidatos importados queden con un estado cargado.
 
 ### Carga inicial desde la planilla de reclutamiento
 
